@@ -1,0 +1,260 @@
+/* --- choose screen --- */
+
+.phase-choose {
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.choose-count {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.choose-title {
+  margin: -1.75rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.choose-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.choice {
+  width: 240px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-edge);
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.14);
+  border-radius: 14px;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
+
+.choice:hover {
+  transform: translateY(-3px);
+  border-color: var(--ink-dim);
+  box-shadow: 0 6px 14px rgba(90, 70, 40, 0.18);
+}
+
+.choice-name {
+  font-size: 0.95rem;
+}
+
+.choice-tagline {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+.choice-mark {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.4rem;
+  border-radius: 50%;
+}
+
+.choice-mark-snake {
+  background: radial-gradient(circle at 35% 35%, var(--snake), transparent 62%);
+}
+
+.choice-mark-fire {
+  background: radial-gradient(circle at 50% 65%, #ffb347, var(--ember) 40%, rgba(74, 63, 51, 0.35) 72%, transparent 80%);
+}
+
+/* --- the destruction stage --- */
+
+.phase-destroy {
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+}
+
+.destroy-instructions {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+/* The shared coordinate system: a grid of character cells sized in `ch`,
+   identical to the one the writing phase draws into. */
+.grid-stage {
+  position: relative;
+  font-family: var(--mono);
+  /* Row height switches from a fixed length to `em` here so the whole grid can
+     be scaled by changing one font-size. */
+  --lh: 1.6em;
+  /* A long entry has to fit on screen without scrolling -- you can't play a
+     snake game that's half off the page. So the grid shrinks to fit, taking
+     the smaller of "as big as we'd like" and what the viewport allows.
+     0.63em is the approximate width of a monospace character; the actual
+     layout below uses exact `ch` units. */
+  font-size: min(
+    var(--type-size),
+    calc((100dvh - 13rem) / (var(--rows) * 1.6)),
+    calc((100vw - 3rem) / (var(--cols) * 0.63))
+  );
+  width: calc(var(--cols) * 1ch);
+  height: calc(var(--rows) * var(--lh));
+}
+
+.cell {
+  position: absolute;
+  left: calc(var(--col) * 1ch);
+  top: calc(var(--row) * var(--lh));
+  width: 1ch;
+  height: var(--lh);
+  line-height: var(--lh);
+  color: var(--ink);
+}
+
+.destroy-hud {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hud-progress {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- snake --- */
+
+.stage-snake {
+  border: 1px solid var(--surface-edge);
+  border-radius: 6px;
+}
+
+.snake-seg {
+  position: absolute;
+  left: calc(var(--col) * 1ch);
+  top: calc(var(--row) * var(--lh));
+  width: 1ch;
+  height: var(--lh);
+  background: var(--snake);
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+.snake-seg.is-head {
+  opacity: 1;
+  /* A drop shadow reads as "sitting on the paper". A glow would read as
+     backlit, which is wrong now the page is light. */
+  box-shadow: 0 1px 3px rgba(60, 70, 35, 0.45);
+}
+
+/* --- fire --- */
+
+.stage-fire {
+  cursor: crosshair;
+}
+
+/* The burn front, drawn over blank page as well as over letters. Without this
+   the fire is invisible between words and reads as letters blinking out.
+
+   Blurring the whole layer at once is what turns a grid of individual cells
+   into one continuous flame front. Blurred separately they stay pills. */
+.flame-layer {
+  position: absolute;
+  inset: 0;
+  filter: blur(3.5px);
+  pointer-events: none;
+}
+
+.flame {
+  position: absolute;
+  /* Deliberately larger than one cell, and offset back by half the overspill,
+     so neighbouring flames overlap and merge under the blur. */
+  left: calc(var(--col) * 1ch - 0.5ch);
+  top: calc(var(--row) * var(--lh) - 0.3 * var(--lh));
+  width: 2ch;
+  height: calc(1.6 * var(--lh));
+  border-radius: 50%;
+}
+
+/* Two things stacked in one element: the hot core, which dies quickly, and the
+   char mark underneath, which lingers and fades. On pale paper the char is what
+   actually communicates "burning" -- a glow alone barely registers. */
+.flame::before,
+.flame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.flame::before {
+  /* Burnt sienna rather than neutral brown. A desaturated brown over cream
+     goes grey and reads as smoke damage instead of scorched paper. */
+  background: radial-gradient(
+    circle at 50% 55%,
+    rgba(116, 56, 20, 0.82),
+    rgba(104, 50, 20, 0.3) 55%,
+    transparent 78%
+  );
+  opacity: var(--scorch);
+}
+
+.flame::after {
+  background: radial-gradient(
+    circle at 50% 55%,
+    rgba(255, 214, 130, 0.98) 0%,
+    rgba(240, 130, 30, 0.95) 26%,
+    rgba(198, 62, 12, 0.8) 48%,
+    transparent 72%
+  );
+  opacity: var(--heat);
+}
+
+/* Ink chars before it disappears -- it darkens rather than lighting up. */
+.cell-burning {
+  color: #34140a;
+  text-shadow:
+    0 0 4px rgba(255, 170, 70, 0.95),
+    0 0 10px rgba(226, 88, 18, 0.7);
+  animation: flicker 0.18s steps(2) infinite alternate;
+}
+
+@keyframes flicker {
+  to {
+    opacity: 0.78;
+    transform: translateY(-1px);
+  }
+}
+
+.cell-ash {
+  color: var(--char);
+  opacity: 0.55;
+  /* Matched to how long ash actually survives in fire.tsx (6 ticks x 70ms), so
+     letters finish fading instead of being cut off mid-crumble. */
+  animation: crumble 0.42s var(--ease) forwards;
+}
+
+@keyframes crumble {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) rotate(12deg);
+  }
+}
