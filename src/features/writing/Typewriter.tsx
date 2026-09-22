@@ -97,7 +97,9 @@ function arc(index: number, count: number) {
   const centre = (count - 1) / 2
   const offset = centre === 0 ? 0 : (index - centre) / centre
   return {
-    '--lift': `${-(offset * offset) * 10}px`,
+    // Measured in key widths rather than pixels, so the arc keeps its shape
+    // when `--key` changes the size of the whole keyboard.
+    '--lift': `calc(${-(offset * offset) * 0.33} * var(--key))`,
     '--tilt': `${offset * 3}deg`,
   } as React.CSSProperties
 }
