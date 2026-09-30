@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { COLS, countWords, layout } from '../../core/text'
 import { playBell, playStrike } from '../../lib/sound'
 import { Paper } from './Paper'
+import { TelegramStrip } from './TelegramStrip'
 import { Typewriter, type Strike } from './Typewriter'
 
 type Props = {
@@ -71,6 +72,7 @@ export function WritingPhase({ text, onChange, onDone }: Props) {
 
   return (
     <div className="phase phase-writing" onMouseDown={keepFocus}>
+      <TelegramStrip words={words} />
       <Paper lines={lines} caret={caret} placeholder="Start typing. No one else will see this." />
 
       <textarea
@@ -93,7 +95,6 @@ export function WritingPhase({ text, onChange, onDone }: Props) {
       <div className="writing-machine">
         <Typewriter strike={strike} col={caret.col} cols={COLS} />
         <div className="writing-actions">
-          <span className="word-count">{words === 1 ? '1 word' : `${words} words`}</span>
           <button className="button button-primary" disabled={words === 0} onClick={onDone}>
             Done
           </button>
