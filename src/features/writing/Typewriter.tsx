@@ -12,6 +12,16 @@ type Props = {
 
 const TYPE_BARS = 21
 
+/**
+ * The italic notes a patent drawing pins to the parts of the machine. They
+ * only label -- positions live in CSS, one class per note.
+ */
+const PATENT_NOTES = [
+  { id: 'carriage', text: 'carriage' },
+  { id: 'platen', text: 'fig. 1 — platen' },
+  { id: 'spacebar', text: 'space bar' },
+]
+
 type Key = {
   /** What's printed on the cap. `\n` splits it over two lines. */
   label: string
@@ -185,6 +195,12 @@ export const Typewriter = memo(function Typewriter({ strike, col, cols }: Props)
           <span>space bar</span>
         </div>
       </div>
+
+      {PATENT_NOTES.map((note) => (
+        <span key={note.id} className={`tw-note tw-note-${note.id}`}>
+          {note.text}
+        </span>
+      ))}
     </div>
   )
 })

@@ -120,7 +120,7 @@
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
-  padding: 1rem 1.5rem 2rem;
+  padding: 2.25rem 1.5rem 2rem;
 }
 
 .typewriter {
@@ -137,6 +137,7 @@
   flex-direction: column;
   align-items: center;
   user-select: none;
+  position: relative;
 }
 
 /* --- platen: the roller the paper sits against --- */
@@ -399,6 +400,60 @@
   background: var(--ribbon);
 }
 
+/* --- patent-drawing notes --- */
+
+/* Italic labels with thin pointer lines, in stamp blue, as on a patent
+   drawing. Decoration only: they never take a click. */
+.tw-note {
+  position: absolute;
+  font-family: var(--annotation);
+  font-style: italic;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--stamp);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tw-note::after {
+  content: '';
+  position: absolute;
+  border-color: var(--stamp);
+  border-style: solid;
+  border-width: 0;
+}
+
+/* Above the rail, each with a short drop line down to it. */
+.tw-note-carriage,
+.tw-note-platen {
+  top: -1.75rem;
+}
+.tw-note-carriage {
+  left: 3.4rem;
+}
+.tw-note-platen {
+  right: 1.5rem;
+}
+.tw-note-carriage::after,
+.tw-note-platen::after {
+  top: calc(100% + 0.2rem);
+  left: 0.6rem;
+  height: 1.3rem;
+  border-left-width: 1px;
+}
+
+/* Beside the space bar, with a short line reaching in to it. */
+.tw-note-spacebar {
+  left: calc(50% + var(--key) * 4.75 + 1.6rem);
+  bottom: calc(var(--key) * 0.42 - 0.36rem);
+}
+.tw-note-spacebar::after {
+  right: calc(100% + 0.25rem);
+  top: 50%;
+  width: 1.55rem;
+  border-top-width: 1px;
+}
+
 .writing-actions {
   /* Done sits at the right edge of the page. */
   align-self: stretch;
@@ -417,6 +472,10 @@
     --stroke: 2px;
   }
   /* Clear of the sound toggle, which sits in the top-right corner. */
+  /* No room beside a phone-sized keyboard; the notes would collide. */
+  .tw-note {
+    display: none;
+  }
   .telegram-strip {
     margin-top: 3.5rem;
   }
