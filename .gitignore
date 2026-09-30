@@ -5,3 +5,5 @@ dist
 
 # Local editor/agent settings, specific to one machine
 .claude/settings.local.json
+
+.superpowers/
