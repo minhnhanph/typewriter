@@ -155,6 +155,9 @@
   );
   width: calc(var(--cols) * 1ch);
   height: calc(var(--rows) * var(--lh));
+  /* Room for the column scale, which hangs above the grid, so it takes real
+     space in the layout instead of sitting on the ticker. */
+  margin-top: 1.5em;
 }
 
 .cell {

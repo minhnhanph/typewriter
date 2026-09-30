@@ -178,10 +178,16 @@ function SnakeStage({ grid, playable, onComplete, onProgress }: DestroyerProps) 
         ))}
       </GridStage>
 
-      {/* The count lives in the ticker now; only the hand-off button stays. */}
-      {playable && !auto && (
+      {/* The count lives in the ticker now; only the hand-off button stays.
+          Hidden rather than removed once pressed, so the grid doesn't jump
+          under the player when the row it sits in disappears. */}
+      {playable && (
         <div className="destroy-hud">
-          <button className="button button-ghost" onClick={() => setAuto(true)}>
+          <button
+            className="button button-ghost"
+            style={{ visibility: auto ? 'hidden' : 'visible' }}
+            onClick={() => setAuto(true)}
+          >
             Finish it for me
           </button>
         </div>
