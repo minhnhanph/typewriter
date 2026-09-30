@@ -1,3 +1,13 @@
+/* The printed parts of the telegram -- TELEGRAM, ticket names, the stamp.
+   Bundled rather than loaded from a font service, so the site makes no
+   outside requests. */
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('../assets/fonts/barlow-condensed-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
 /* Design tokens. Every colour and size in the app comes from here, so
    restyling the whole thing means editing this block and nothing else. */
 :root {
@@ -21,15 +31,19 @@
   --ribbon: #a33a26;
   --ribbon-bright: #c04a30;
 
-  /* The machine itself: dark enamel and keys. */
-  --machine: #3b332a;
-  --machine-rail: #cbbb9c;
+  /* Rubber-stamp blue: the NOT DELIVERED stamp and the patent labels on the
+     machine. The only cool colour in the palette, so it reads as "office". */
+  --stamp: #2f4a6b;
 
   --ember: #d2500f;
   --char: #4a3f33;
   --snake: #5f7a37;
 
   --mono: 'iA Writer Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+  /* Condensed capitals for anything printed on a form. Never the user's words. */
+  --display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  /* The italic notes on a patent drawing. */
+  --annotation: Georgia, 'Times New Roman', serif;
   --type-size: 17px;
   /* The row height of the character grid. Must be a length, not a ratio,
      because everything is positioned against it. */
@@ -98,6 +112,24 @@ body::after {
 }
 
 /* --- controls --- */
+
+/* Printed on the form: the red condensed capitals of a telegram blank. */
+.printed {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ribbon);
+  line-height: 1;
+}
+
+/* The tiny spaced capitals that label a box on a form. */
+.fine-print {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
 
 .button {
   font: inherit;
