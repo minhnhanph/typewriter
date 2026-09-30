@@ -19,7 +19,8 @@ write  →  choose  →  destroy  →  aftermath
    a page that scrolls as it grows.
 2. **Choose.** Two ways to destroy it: feed it to a snake, or give it to a fire.
 3. **Destroy.** The text is eaten or burned away, character by character.
-4. **Aftermath.** Ash drifts, a word count, and an invitation to write again.
+4. **Aftermath.** A NOT DELIVERED stamp, a torn receipt (counts and times, never
+   the words), drifting ash, and an invitation to write again.
 
 **The promise the product rests on: the destruction is real.** The draft is
 deleted from the browser the moment the user picks a destroyer — not when the
@@ -70,15 +71,16 @@ That's why the snake and the fire share almost no code but line up perfectly.
 src/
   App.tsx                       the 4-stage machine, and nothing else
   core/text.ts                  wrapping, the character grid, word count
-  lib/                          useLocalDraft, useIsTouch, sound
+  lib/                          useLocalDraft, useIsTouch, useClock, time, sound
   features/
-    writing/                    Paper (the page), Typewriter (the machine)
+    writing/                    Paper (the page), Typewriter (the machine), TelegramStrip
     destruction/
       ChoosePhase, DestructionPhase, GridStage
       registry.ts               ← the list of destroyers
       types.ts                  ← the Destroyer contract
       destroyers/snake.tsx, fire.tsx
     aftermath/
+      Receipt.tsx               the torn receipt and its data
   styles/                       base.css holds every colour and size
 ```
 
@@ -87,7 +89,8 @@ src/
 Adding a third way to destroy the text:
 
 1. Copy `destroyers/fire.tsx`. Empty the grid however you like; call
-   `onComplete()` when done.
+   `onComplete()` when done. Give it a one-word `short` and a line-drawing
+   `Mark` for its ticket; call `onProgress` if you want the ticker to count.
 2. Add it to the array in `registry.ts`.
 
 That's the whole change. Nothing else needs to know it exists.
@@ -110,7 +113,11 @@ Each of these was a genuine failure, not a hypothetical:
 - **Ash timing is coupled.** `.cell-ash`'s animation duration must match
   `ASH_TICKS × TICK` in `fire.tsx`, or letters get cut off mid-fade.
 - **The destruction stage auto-shrinks** to fit the viewport via a `min()` on
-  its font size — you can't play a snake game that's half off the page.
+  its font size — you can't play a snake game that's half off the page. The
+  column scale above the grid is counted in that sum (the `+ 1.5`).
+- **`useIsTouch` must answer on the first render.** The snake picks autopilot
+  from its first render only. When touch was detected a moment later, phones
+  got a manual snake with no keyboard and it never finished.
 
 ### Verifying changes
 
@@ -129,6 +136,12 @@ the faded brown of a typewriter ribbon, and a red accent taken from the red half
 of a two-colour ribbon. The machine is drawn as flat line art — the style of a
 mid-century typing chart.
 
+**The telegram kit.** Each screen borrows telegram-office parts, never the whole
+form: a header strip over the page (Write), counter tickets (Choose), ticker tape
+and the typewriter's column scale (Destroy), a rubber stamp and a torn receipt
+(Aftermath), and patent-drawing notes on the machine. Printed parts are capitals
+in `--display`; the user's own words never are.
+
 ### Semantic tokens
 
 All of them live at the top of `src/styles/base.css`. Nothing else in the app
@@ -138,7 +151,7 @@ hardcodes a colour, so retheming means editing that one block.
 | --- | --- | --- |
 | `--paper` | `#ece2cd` | The page. Everything sits on this. |
 | `--paper-light` | `#f4ecda` | Lifted paper: keycap faces, the space bar, text on dark. |
-| `--surface` | `#f6efdf` | Raised cards (the two choices). |
+| `--surface` | `#f6efdf` | Raised paper: the tickets, the receipt. |
 | `--surface-edge` | `#d5c7a9` | Borders on raised things and quiet buttons. |
 | `--ink` | `#33291f` | Body text, and every drawn line on the machine. **11.0:1** |
 | `--ink-dim` | `#6d6152` | Secondary text: placeholder, sub-labels. **4.7:1** |
@@ -148,14 +161,14 @@ hardcodes a colour, so retheming means editing that one block.
 | `--ember` | `#d2500f` | Fire, on the choose screen. |
 | `--char` | `#4a3f33` | Charred letters and drifting ash. |
 | `--snake` | `#5f7a37` | The snake. **3.8:1** — decorative, never text. |
+| `--stamp` | `#2f4a6b` | Rubber stamps and patent notes. The one cool colour. **~7:1** |
+| `--display` | Barlow Condensed | Printed capitals on the form. Bundled in `src/assets/fonts`. |
+| `--annotation` | Georgia | The italic notes on the machine. |
 | `--mono` / `--type-size` / `--lh` | — | The character grid. `--lh` must stay a length, not a ratio; everything is positioned against it. |
 | `--ease` | — | The one easing curve. Use it for all motion. |
 
 Contrast is measured against `--paper`. `--ink-faint` at 4.45 sits just under
 the 4.5 accessibility threshold, so it is only for text nobody has to read.
-
-> `--machine` and `--machine-rail` are **dead** — leftovers from when the
-> keyboard had dark caps. Safe to delete.
 
 ### Guidelines
 
@@ -168,7 +181,7 @@ Short, and each one earns its place:
    reads as a calculator.
 3. **Fire scorches, it doesn't glow.** A glow is invisible on pale paper. Flame
    carries a burnt-sienna char mark with it. Anything "hot" on this theme must
-   darken, not brighten.
+   darken, not brighten. The one exception is stamp blue, which is ink, not heat.
 4. **Colour comes from the table above.** If a new colour seems necessary, it
    probably means a token is missing, not that a hex belongs in a component.
 5. **Motion is quiet.** One easing curve, short durations. The app respects
@@ -198,7 +211,6 @@ The numbers worth turning when something feels wrong:
   Unresolved on purpose; needs a design call (centre the text, cap the page
   height, or leave it as breathing room).
 - **Ash on the aftermath screen is very subtle** since the theme went light.
-- **`--machine` / `--machine-rail` are unused.**
 
 ## Open threads
 
