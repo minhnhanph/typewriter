@@ -29,54 +29,70 @@
   gap: 1rem;
 }
 
-.choice {
-  width: 240px;
-  padding: 2rem 1.5rem;
+/* A counter ticket from a telegraph office: flat card, round notches punched
+   out of both sides, a perforation above the small print. */
+.ticket {
+  --notch: 9px;
+  width: 220px;
+  padding: 1.1rem 1.25rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   background: var(--surface);
   border: 1px solid var(--surface-edge);
-  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.14);
-  border-radius: 14px;
   color: var(--ink);
   font: inherit;
   cursor: pointer;
+  /* Real holes, cut with a mask, so the paper grain shows through them. */
+  mask:
+    radial-gradient(circle var(--notch) at 0 50%, transparent 98%, black) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% 50%, transparent 98%, black) right / 51% 100% no-repeat;
   transition:
     border-color 0.25s var(--ease),
     transform 0.25s var(--ease);
 }
 
-.choice:hover {
+.ticket:hover {
   transform: translateY(-3px);
   border-color: var(--ink-dim);
-  box-shadow: 0 6px 14px rgba(90, 70, 40, 0.18);
 }
 
-.choice-name {
-  font-size: 0.95rem;
+/* The mask would clip an outline, so focus is drawn inside the edge. */
+.ticket:focus-visible {
+  outline: none;
+  border-color: var(--ribbon);
+  box-shadow: inset 0 0 0 1px var(--ribbon);
 }
 
-.choice-tagline {
+.ticket-mark svg {
+  display: block;
+  width: 84px;
+  height: 42px;
+}
+
+.ticket-snake .ticket-mark {
+  color: var(--snake);
+}
+
+.ticket-fire .ticket-mark {
+  color: var(--ember);
+}
+
+.ticket-name {
+  font-size: 1.6rem;
+}
+
+.ticket-perforation {
+  align-self: stretch;
+  margin: 0.2rem -1.25rem 0.1rem;
+  border-top: 1.5px dashed var(--surface-edge);
+}
+
+.ticket-tagline {
   font-size: 0.75rem;
   line-height: 1.5;
   color: var(--ink-dim);
-}
-
-.choice-mark {
-  width: 46px;
-  height: 46px;
-  margin-bottom: 0.4rem;
-  border-radius: 50%;
-}
-
-.choice-mark-snake {
-  background: radial-gradient(circle at 35% 35%, var(--snake), transparent 62%);
-}
-
-.choice-mark-fire {
-  background: radial-gradient(circle at 50% 65%, #ffb347, var(--ember) 40%, rgba(74, 63, 51, 0.35) 72%, transparent 80%);
 }
 
 /* --- the destruction stage --- */

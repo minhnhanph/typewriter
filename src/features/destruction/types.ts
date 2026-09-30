@@ -20,8 +20,12 @@ export type DestroyerProps = {
 export type Destroyer = {
   id: string
   name: string
+  /** One word, printed large on its ticket and on the receipt. */
+  short: string
   /** One line on the choose screen. */
   tagline: string
+  /** A small line drawing for its ticket. Draw with `currentColor`. */
+  Mark: ComponentType
   /** How to operate it, shown while it runs. */
   instructions: { playable: string; watching: string }
   Component: ComponentType<DestroyerProps>

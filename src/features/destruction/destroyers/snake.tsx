@@ -190,10 +190,22 @@ function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
   )
 }
 
+/** The ticket drawing: one S-curve of body and a head. */
+function SnakeMark() {
+  return (
+    <svg viewBox="0 0 80 40" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+      <path d="M8 28 Q18 12 28 24 T48 24 T66 18" />
+      <circle cx="68" cy="17" r="3" />
+    </svg>
+  )
+}
+
 export const snakeDestroyer: Destroyer = {
   id: 'snake',
   name: 'Feed it to the snake',
+  short: 'Snake',
   tagline: 'Steer. Eat every last letter yourself.',
+  Mark: SnakeMark,
   instructions: {
     playable: 'Arrow keys or WASD. Walls wrap around. You cannot lose.',
     watching: 'The snake finds its own way through.',

@@ -206,10 +206,29 @@ function FireStage({ grid, onComplete }: DestroyerProps) {
   )
 }
 
+/** The ticket drawing: a single flame on a ruled line. */
+function FireMark() {
+  return (
+    <svg
+      viewBox="0 0 80 40"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M40 36 C28 30 30 20 36 14 C36 22 42 22 42 16 C42 10 46 6 46 4 C54 14 54 30 40 36 Z" />
+      <path d="M24 37 H56" strokeWidth="1.4" style={{ stroke: 'var(--ink)' }} />
+    </svg>
+  )
+}
+
 export const fireDestroyer: Destroyer = {
   id: 'fire',
   name: 'Give it to the fire',
+  short: 'Fire',
   tagline: 'Sit back. Watch it climb the page.',
+  Mark: FireMark,
   instructions: {
     playable: 'Click anywhere to drop another spark.',
     watching: 'Tap anywhere to drop another spark.',
