@@ -85,7 +85,7 @@ function autoDirection(state: GameState, rows: number, cols: number): Vec {
   return state.dir
 }
 
-function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
+function SnakeStage({ grid, playable, onComplete, onProgress }: DestroyerProps) {
   const rows = Math.max(grid.rows, MIN_ROWS)
   const arena = useMemo(() => ({ ...grid, rows }), [grid, rows])
 
@@ -99,6 +99,8 @@ function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
   autoRef.current = auto
   const completeRef = useRef(onComplete)
   completeRef.current = onComplete
+  const progressRef = useRef(onProgress)
+  progressRef.current = onProgress
 
   // Steering. There is no fail state: walls wrap and the snake passes through
   // itself, so the only thing that can happen is finishing.
@@ -138,6 +140,7 @@ function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
         if (state.remaining.has(key)) {
           state.remaining.delete(key)
           state.eaten++
+          progressRef.current?.(state.eaten, grid.cells.length)
           if (state.eaten % 2 === 0) playStrike()
           if (state.eaten % GROW_EVERY === 0 && state.body.length < MAX_LENGTH) state.growth++
         }
@@ -154,10 +157,9 @@ function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
       auto ? TICK_AUTO : TICK_PLAYED,
     )
     return () => window.clearInterval(interval)
-  }, [auto, rows, arena.cols])
+  }, [auto, rows, arena.cols, grid.cells.length])
 
   const state = game.current
-  const total = grid.cells.length
 
   return (
     <>
@@ -176,16 +178,14 @@ function SnakeStage({ grid, playable, onComplete }: DestroyerProps) {
         ))}
       </GridStage>
 
-      <div className="destroy-hud">
-        <span className="hud-progress">
-          {state.eaten} / {total} eaten
-        </span>
-        {playable && !auto && (
+      {/* The count lives in the ticker now; only the hand-off button stays. */}
+      {playable && !auto && (
+        <div className="destroy-hud">
           <button className="button button-ghost" onClick={() => setAuto(true)}>
             Finish it for me
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </>
   )
 }

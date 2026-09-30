@@ -69,7 +69,7 @@ function lightAt(model: Model, rows: number, cols: number, row: number, col: num
  * So the flame front lives on the full rectangle of the page, blank cells
  * included, and a letter catches when the fire reaches the spot it's sitting on.
  */
-function FireStage({ grid, onComplete }: DestroyerProps) {
+function FireStage({ grid, onComplete, onProgress }: DestroyerProps) {
   const [, render] = useReducer((n: number) => n + 1, 0)
   const model = useRef<Model | null>(null)
 
@@ -89,6 +89,8 @@ function FireStage({ grid, onComplete }: DestroyerProps) {
 
   const completeRef = useRef(onComplete)
   completeRef.current = onComplete
+  const progressRef = useRef(onProgress)
+  progressRef.current = onProgress
 
   useEffect(() => {
     let finished = false
@@ -146,63 +148,59 @@ function FireStage({ grid, onComplete }: DestroyerProps) {
           if (++sparks >= 3) break
         }
       }
+
+      // A letter counts as destroyed the moment it catches.
+      let intact = 0
+      for (const letter of letters.values()) if (letter.phase === 'intact') intact++
+      progressRef.current?.(grid.cells.length - intact, grid.cells.length)
       render()
     }, TICK)
 
     return () => window.clearInterval(interval)
-  }, [grid.rows, grid.cols])
+  }, [grid.rows, grid.cols, grid.cells.length])
 
   const { letters, flames } = model.current
   const remaining = [...letters.values()]
-  const burnt = grid.cells.length - remaining.filter((l) => l.phase === 'intact').length
 
   return (
-    <>
-      <GridStage
-        grid={grid}
-        className="stage-fire"
-        onPointerDown={({ row, col }) => {
-          // Let people choose where it catches.
-          lightAt(model.current!, grid.rows, grid.cols, row, col, true)
-          render()
-        }}
-      >
-        {/* The fire itself, drawn over blank page as well as over letters.
-            The layer is blurred as a whole so neighbouring cells melt into one
-            burn front instead of reading as a row of separate orange pills. */}
-        <div className="flame-layer">
-          {[...flames.values()].map((flame) => (
-            <span
-              key={posKey(flame.row, flame.col)}
-              className="flame"
-              style={
-                {
-                  ...cellStyle(flame.row, flame.col),
-                  '--heat': Math.max(0, 1 - flame.age / HEAT_LIFE),
-                  '--scorch': 1 - flame.age / FLAME_LIFE,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-        </div>
-
-        {remaining.map((letter) => (
+    <GridStage
+      grid={grid}
+      className="stage-fire"
+      onPointerDown={({ row, col }) => {
+        // Let people choose where it catches.
+        lightAt(model.current!, grid.rows, grid.cols, row, col, true)
+        render()
+      }}
+    >
+      {/* The fire itself, drawn over blank page as well as over letters.
+          The layer is blurred as a whole so neighbouring cells melt into one
+          burn front instead of reading as a row of separate orange pills. */}
+      <div className="flame-layer">
+        {[...flames.values()].map((flame) => (
           <span
-            key={letter.cell.id}
-            className={`cell cell-${letter.phase}`}
-            style={cellStyle(letter.cell.row, letter.cell.col)}
-          >
-            {letter.cell.char}
-          </span>
+            key={posKey(flame.row, flame.col)}
+            className="flame"
+            style={
+              {
+                ...cellStyle(flame.row, flame.col),
+                '--heat': Math.max(0, 1 - flame.age / HEAT_LIFE),
+                '--scorch': 1 - flame.age / FLAME_LIFE,
+              } as React.CSSProperties
+            }
+          />
         ))}
-      </GridStage>
-
-      <div className="destroy-hud">
-        <span className="hud-progress">
-          {burnt} / {grid.cells.length} burned
-        </span>
       </div>
-    </>
+
+      {remaining.map((letter) => (
+        <span
+          key={letter.cell.id}
+          className={`cell cell-${letter.phase}`}
+          style={cellStyle(letter.cell.row, letter.cell.col)}
+        >
+          {letter.cell.char}
+        </span>
+      ))}
+    </GridStage>
   )
 }
 

@@ -7,6 +7,11 @@ export type DestroyerProps = {
   playable: boolean
   /** Call once every character is gone. */
   onComplete: () => void
+  /**
+   * Optional. Report how many characters are gone so far, for the ticker.
+   * It only reports -- finishing is still decided by calling `onComplete`.
+   */
+  onProgress?: (destroyed: number, total: number) => void
 }
 
 /**
