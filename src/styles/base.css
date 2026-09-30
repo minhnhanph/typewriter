@@ -203,23 +203,71 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1.75rem;
   animation: phase-in 1.4s var(--ease) 0.4s both;
 }
 
-.aftermath-stat {
+/* A rubber stamp, thumped down a moment after the screen arrives. Tilted, and
+   a little translucent, the way real stamp ink sits on paper. */
+.stamp {
   margin: 0;
-  font-size: 1.5rem;
-  color: var(--ink);
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  padding: 0.4rem 1.1rem 0.3rem;
+  border: 3px solid var(--stamp);
+  border-radius: 6px;
+  color: var(--stamp);
+  font-size: 2.2rem;
+  opacity: 0.85;
+  transform: rotate(-8deg);
+  animation: stamp-down 0.38s var(--ease) 0.5s both;
 }
 
-.aftermath-stat-sub {
-  font-size: 0.85rem;
-  color: var(--ink-dim);
-  letter-spacing: 0.04em;
+@keyframes stamp-down {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.6);
+  }
+}
+
+/* Torn off a pad: the zig-zag bottom edge is cut with a mask, so the page
+   shows through the teeth. */
+.receipt {
+  --tooth: 0.5rem;
+  width: min(18rem, 100%);
+  padding: 0.9rem 1.1rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-edge);
+  border-bottom: 0;
+  font-size: 0.8rem;
+  text-align: left;
+  mask:
+    linear-gradient(black 0 0) top / 100% calc(100% - var(--tooth)) no-repeat,
+    conic-gradient(from -45deg at 50% 100%, black 90deg, transparent 0) bottom / calc(2 * var(--tooth)) var(--tooth) repeat-x;
+  animation: phase-in 0.6s var(--ease) 1s both;
+}
+
+.receipt-title {
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.receipt dl {
+  margin: 0;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.15rem 0;
+  border-bottom: 1px dotted var(--surface-edge);
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-row:last-child {
+  border-bottom: 0;
+}
+
+.receipt-row dd {
+  margin: 0;
 }
 
 .ashfall {
@@ -265,5 +313,7 @@ body::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
   }
 }

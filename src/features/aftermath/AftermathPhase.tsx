@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
+import { Receipt, type ReceiptData } from './Receipt'
 
 type Props = {
-  words: number
-  characters: number
+  receipt: ReceiptData
   onWriteAgain: () => void
 }
 
@@ -13,7 +13,7 @@ const ASH_COUNT = 34
  * exists so the destruction has somewhere to settle instead of snapping back
  * to a blank page.
  */
-export function AftermathPhase({ words, characters, onWriteAgain }: Props) {
+export function AftermathPhase({ receipt, onWriteAgain }: Props) {
   // Generated once so the ash doesn't reshuffle on every render.
   const ashes = useMemo(
     () =>
@@ -50,10 +50,8 @@ export function AftermathPhase({ words, characters, onWriteAgain }: Props) {
       </div>
 
       <div className="aftermath-content">
-        <p className="aftermath-stat">
-          {words === 1 ? '1 word' : `${words} words`}
-          <span className="aftermath-stat-sub">{characters} characters, gone</span>
-        </p>
+        <p className="printed stamp">Not delivered</p>
+        <Receipt receipt={receipt} />
         <button className="button button-primary" onClick={onWriteAgain}>
           Write something else
         </button>

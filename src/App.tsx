@@ -3,6 +3,8 @@ import { AftermathPhase } from './features/aftermath/AftermathPhase'
 import { ChoosePhase } from './features/destruction/ChoosePhase'
 import { DestructionPhase } from './features/destruction/DestructionPhase'
 import { WritingPhase } from './features/writing/WritingPhase'
+import type { ReceiptData } from './features/aftermath/Receipt'
+import { findDestroyer } from './features/destruction/registry'
 import { countWords } from './core/text'
 import { setMuted } from './lib/sound'
 import { useLocalDraft } from './lib/useLocalDraft'
@@ -14,8 +16,11 @@ import { useLocalDraft } from './lib/useLocalDraft'
 type Stage =
   | { name: 'write' }
   | { name: 'choose' }
-  | { name: 'destroy'; destroyerId: string }
-  | { name: 'aftermath'; words: number; characters: number }
+  | { name: 'destroy'; destroyerId: string; filedAt: Date }
+  | { name: 'aftermath'; receipt: ReceiptData }
+
+/** A docket number for the receipt. Made up; nothing is stored. */
+const docketNumber = () => String(Math.floor(Math.random() * 10_000)).padStart(4, '0')
 
 export default function App() {
   const { text, setText, discard } = useLocalDraft()
@@ -37,17 +42,27 @@ export default function App() {
       // The point of no return: the saved draft dies the moment they commit,
       // so the words can't come back on the next visit.
       discard()
-      setStage({ name: 'destroy', destroyerId })
+      setStage({ name: 'destroy', destroyerId, filedAt: new Date() })
     },
     [text, discard],
   )
 
   const finishDestruction = useCallback(() => {
-    setStage({
-      name: 'aftermath',
-      words: countWords(condemned),
-      characters: condemned.replace(/\s/g, '').length,
-    })
+    setStage((current) =>
+      current.name !== 'destroy'
+        ? current
+        : {
+            name: 'aftermath',
+            receipt: {
+              number: docketNumber(),
+              words: countWords(condemned),
+              characters: condemned.replace(/\s/g, '').length,
+              filedAt: current.filedAt,
+              destroyedAt: new Date(),
+              method: findDestroyer(current.destroyerId)?.short ?? current.destroyerId,
+            },
+          },
+    )
     setCondemned('')
   }, [condemned])
 
@@ -86,11 +101,7 @@ export default function App() {
       )}
 
       {stage.name === 'aftermath' && (
-        <AftermathPhase
-          words={stage.words}
-          characters={stage.characters}
-          onWriteAgain={() => setStage({ name: 'write' })}
-        />
+        <AftermathPhase receipt={stage.receipt} onWriteAgain={() => setStage({ name: 'write' })} />
       )}
     </main>
   )
