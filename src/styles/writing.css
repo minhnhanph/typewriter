@@ -299,7 +299,7 @@
 }
 
 /* Shown while the paper is rolled back, so it's clear how to get home. Sits
-   under the carriage, between its two notes. */
+   under the carriage, in the middle. */
 .tw-scroll-hint {
   position: absolute;
   left: 50%;
@@ -601,67 +601,6 @@
 }
 
 
-/* --- patent-drawing notes --- */
-
-/* Italic labels with thin pointer lines, in stamp blue, as on a patent
-   drawing. Decoration only: they never take a click. */
-.tw-note {
-  position: absolute;
-  font-family: var(--annotation);
-  font-style: italic;
-  font-size: 0.72rem;
-  line-height: 1;
-  color: var(--stamp);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.tw-note::after {
-  content: '';
-  position: absolute;
-  border-color: var(--stamp);
-  border-style: solid;
-  border-width: 0;
-}
-
-/* Under the carriage, each with a short leader up to its part -- anywhere
-   above would sit on the paper. */
-.tw-note-carriage,
-.tw-note-platen {
-  top: calc(100% + 0.55rem);
-}
-.tw-note-carriage {
-  left: calc(62px + 3rem);
-}
-.tw-note-platen {
-  right: 0;
-}
-.tw-note-carriage::after,
-.tw-note-platen::after {
-  bottom: calc(100% + 0.15rem);
-  height: 0.4rem;
-  border-left-width: 1px;
-}
-.tw-note-carriage::after {
-  left: 0.6rem;
-}
-/* Up to the centre of the right-hand knob. */
-.tw-note-platen::after {
-  right: 11px;
-}
-
-/* Beside the space bar, with a short line reaching in to it. */
-.tw-note-spacebar {
-  left: calc(50% + var(--key) * 4.75 + 1.6rem);
-  bottom: calc(var(--key) * 0.42 - 0.36rem);
-}
-.tw-note-spacebar::after {
-  right: calc(100% + 0.25rem);
-  top: 50%;
-  width: 1.55rem;
-  border-top-width: 1px;
-}
-
 /* --- below the machine --- */
 
 /* The machine sits this far off the bottom of the screen. */
@@ -687,14 +626,6 @@
 }
 
 
-/* Between phone and wide desktop the corner gets close to the space bar:
-   drop the space bar's note. */
-@media (max-width: 1100px) {
-  .tw-note-spacebar {
-    display: none;
-  }
-}
-
 @media (max-width: 640px) {
   /* The whole keyboard shrinks off these two, since everything is derived
      from them. 11 keys and their gaps have to clear the narrowest phone. */
@@ -702,10 +633,6 @@
     --key: min(27px, 7.4vw);
     --stroke: 2px;
     --wide: calc(100% - 1rem);
-  }
-  /* No room beside a phone-sized keyboard; the notes would collide. */
-  .tw-note {
-    display: none;
   }
   .telegram-strip {
     left: 0.75rem;

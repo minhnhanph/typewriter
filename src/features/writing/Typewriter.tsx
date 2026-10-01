@@ -5,14 +5,6 @@ import { Keyboard } from './Keyboard'
 import { Paper } from './Paper'
 import { TYPE_BARS, type Motion, type Swing } from './useMachine'
 
-/**
- * An italic note pinned to a part of the machine, as on a patent drawing. It
- * sits inside the part it labels; its position lives in CSS, one class each.
- */
-const Note = ({ id, children }: { id: string; children: string }) => (
-  <span className={`tw-note tw-note-${id}`}>{children}</span>
-)
-
 /** Where the carriage sits on its rail, 0 at the left end to 1 at the right. */
 const railAt = (col: number) => 1 - Math.min(col, COLS) / COLS
 
@@ -116,8 +108,6 @@ export function Typewriter({
           />
           <div className={`tw-carriage is-${motion}`} style={{ '--at': railAt(col) } as React.CSSProperties} />
         </div>
-        <Note id="carriage">carriage</Note>
-        <Note id="platen">fig. 1 — platen knob</Note>
         {/* Outside the paper window, so its fade can't swallow it. */}
         {scroll > 0 && <span className="tw-scroll-hint fine-print">Rolled back · type to return</span>}
       </div>
@@ -150,8 +140,6 @@ export function Typewriter({
         </div>
 
         <Keyboard pressed={pressed} shift={shift} onKey={onKey} />
-
-        <Note id="spacebar">space bar</Note>
       </div>
     </div>
   )

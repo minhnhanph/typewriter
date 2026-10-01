@@ -173,7 +173,7 @@ mid-century typing chart.
 **The telegram kit.** Each screen borrows telegram-office parts, never the whole
 form: a header strip over the page (Write), counter tickets (Choose), ticker tape
 and the typewriter's column scale (Destroy), a rubber stamp and a torn receipt
-(Aftermath), and patent-drawing notes on the machine. Printed parts are capitals
+(Aftermath), and the numbered patent drawing of the anatomy view. Printed parts are capitals
 in `--display`; the user's own words never are.
 
 ### Semantic tokens
@@ -195,10 +195,10 @@ hardcodes a colour, so retheming means editing that one block.
 | `--ember` | `#d2500f` | Fire, on the choose screen. |
 | `--char` | `#4a3f33` | Charred letters and drifting ash. |
 | `--snake` | `#5f7a37` | The snake. **3.8:1** — decorative, never text. |
-| `--stamp` | `#2f4a6b` | Rubber stamps and patent notes. The one cool colour. **~7:1** |
+| `--stamp` | `#2f4a6b` | Rubber stamps and the anatomy's reference numbers. The one cool colour. **~7:1** |
 | `--stamp-light` | `#4682c8` | Hovered parts on the anatomy drawing. Lines only. **3.1:1**, and 3.6:1 against the ink |
 | `--display` | Barlow Condensed | Printed capitals on the form. Bundled in `src/assets/fonts`. |
-| `--annotation` | Georgia | The italic notes on the machine. |
+| `--annotation` | Georgia | The patent-style notes and numbers on the anatomy sheet. |
 | `--mono` / `--type-size` / `--lh` | — | The character grid. `--lh` must stay a length, not a ratio; everything is positioned against it. |
 | `--ease` | — | The one easing curve. Use it for all motion. |
 
