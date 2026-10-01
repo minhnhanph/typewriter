@@ -46,7 +46,8 @@ theatre. Anything that weakens this needs a deliberate decision, not a shortcut.
 ## 2. Technical
 
 **Stack:** Vite + React + TypeScript, plain CSS. No backend, no database, no
-state library, no UI kit. React is the only runtime dependency.
+state library, no UI kit. React is the main runtime dependency; three.js is the
+other, used only by the anatomy view and downloaded only when it opens.
 
 ```bash
 npm install       # once
@@ -92,6 +93,11 @@ src/
       destroyers/snake.tsx, fire.tsx
     aftermath/
       Receipt.tsx               the torn receipt and its data
+    anatomy/                    the machine as a rotatable patent drawing
+      parts.ts                  ← the machine as data: shapes, numbers, notes
+      scene.ts                  three.js: paper fills, ink outlines, opening, picking
+      Figure.tsx, useOrbit.ts   the canvas, numbers, leader lines, drag and arrow keys
+      AnatomySheet.tsx          the sheet, parts list and note (a modal <dialog>)
   styles/                       base.css holds every colour and size
 ```
 
@@ -137,6 +143,15 @@ Each of these was a genuine failure, not a hypothetical:
 - **`useIsTouch` must answer on the first render.** The snake picks autopilot
   from its first render only. When touch was detected a moment later, phones
   got a manual snake with no keyboard and it never finished.
+- **The anatomy sheet is a modal `<dialog>`, rendered outside the writing
+  page.** Modal makes the page underneath inert, so arrow keys and letters
+  can't roll the paper or type while it's open. Inside the page, its clicks
+  would reach `keepFocus` and steal focus back to the textarea.
+- **The anatomy canvas is created fresh on every mount.** Development's
+  StrictMode mounts twice; a canvas whose WebGL context was given back can't
+  be drawn on again, and it rendered blank.
+- **`puppeteer-core` isn't in `package.json`,** so `npm install` removes it.
+  Put it back with `npm install --no-save puppeteer-core`.
 
 ### Verifying changes
 
@@ -219,6 +234,8 @@ The numbers worth turning when something feels wrong:
 | Bell point, tab stops | top of `core/sheet.ts` |
 | Typebar delay, swing cap, paper travel | top of `writing/useMachine.ts`; `.is-type` / `.is-tab` / `.is-return` in `writing.css` |
 | Keyboard arc and stagger | `arc()` and row `indent` in `Typewriter.tsx` |
+| Anatomy: opening speed, rest view, tilt limits, line weights | top of `anatomy/scene.ts` |
+| Anatomy: a part's shape, number, note, or where it starts in the opening | its entry in `anatomy/parts.ts` |
 
 ---
 

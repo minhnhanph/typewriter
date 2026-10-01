@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { countWords } from '../../core/text'
+import { AnatomyButton } from '../anatomy/AnatomyButton'
+import { AnatomySheet } from '../anatomy/AnatomySheet'
 import { draftText, type Draft, type Op } from '../../core/sheet'
 import { charFor, keyForChar } from './Keyboard'
 import { TelegramStrip } from './TelegramStrip'
@@ -37,6 +39,9 @@ export function WritingPhase({ draft, onChange, onDone }: Props) {
   const machine = useMachine(draft, onChange)
   const { press, paste, undo, setShiftHeld, shift, toggleShiftSticky } = machine
 
+  /** The anatomy sheet is open over the page. */
+  const [anatomy, setAnatomy] = useState(false)
+
   const text = useMemo(() => draftText(draft), [draft])
   const words = countWords(text)
 
@@ -58,9 +63,10 @@ export function WritingPhase({ draft, onChange, onDone }: Props) {
     [press],
   )
 
+  // On arrival, and again when the anatomy sheet closes, so typing carries on.
   useEffect(() => {
-    input.current?.focus()
-  }, [])
+    if (!anatomy) input.current?.focus()
+  }, [anatomy])
 
   /**
    * Clicking normally moves focus to whatever was clicked. Nothing on this
@@ -157,49 +163,55 @@ export function WritingPhase({ draft, onChange, onDone }: Props) {
   )
 
   return (
-    <div className="phase phase-writing" onMouseDown={keepFocus}>
-      <TelegramStrip words={words} />
+    <>
+      <div className="phase phase-writing" onMouseDown={keepFocus}>
+        <TelegramStrip words={words} />
 
-      <textarea
-        ref={input}
-        className="hidden-input"
-        defaultValue={SENTINEL}
-        spellCheck={false}
-        autoCorrect="off"
-        autoComplete="off"
-        autoCapitalize="sentences"
-        aria-label="Type on the typewriter. Press Escape to leave it."
-        aria-describedby="typed-so-far"
-        onKeyDown={handleKeyDown}
-        onKeyUp={(event) => event.key === 'Shift' && setShiftHeld(false)}
-        onBlur={() => setShiftHeld(false)}
-        onPaste={(event) => {
-          event.preventDefault()
-          paste(event.clipboardData.getData('text/plain'))
-        }}
-      />
-      {/* What's on the page, for screen readers -- the drawn paper is decoration to them. */}
-      <div id="typed-so-far" className="visually-hidden">
-        {text}
+        <textarea
+          ref={input}
+          className="hidden-input"
+          defaultValue={SENTINEL}
+          spellCheck={false}
+          autoCorrect="off"
+          autoComplete="off"
+          autoCapitalize="sentences"
+          aria-label="Type on the typewriter. Press Escape to leave it."
+          aria-describedby="typed-so-far"
+          onKeyDown={handleKeyDown}
+          onKeyUp={(event) => event.key === 'Shift' && setShiftHeld(false)}
+          onBlur={() => setShiftHeld(false)}
+          onPaste={(event) => {
+            event.preventDefault()
+            paste(event.clipboardData.getData('text/plain'))
+          }}
+        />
+        {/* What's on the page, for screen readers -- the drawn paper is decoration to them. */}
+        <div id="typed-so-far" className="visually-hidden">
+          {text}
+        </div>
+
+        <Typewriter
+          draft={draft}
+          motion={machine.motion}
+          swings={machine.swings}
+          pressed={machine.pressed?.key ?? ''}
+          shift={shift}
+          strokes={machine.strokes}
+          onKey={onKey}
+          scroll={scroll}
+          onScroll={scrollBy}
+        />
+
+        <div className="writing-actions">
+          <AnatomyButton onOpen={() => setAnatomy(true)} />
+          <button className="button button-primary" disabled={words === 0} onClick={onDone}>
+            Done
+          </button>
+        </div>
       </div>
 
-      <Typewriter
-        draft={draft}
-        motion={machine.motion}
-        swings={machine.swings}
-        pressed={machine.pressed?.key ?? ''}
-        shift={shift}
-        strokes={machine.strokes}
-        onKey={onKey}
-        scroll={scroll}
-        onScroll={scrollBy}
-      />
-
-      <div className="writing-actions">
-        <button className="button button-primary" disabled={words === 0} onClick={onDone}>
-          Done
-        </button>
-      </div>
-    </div>
+      {/* Outside the page, so its clicks never reach keepFocus. */}
+      {anatomy && <AnatomySheet onClose={() => setAnatomy(false)} />}
+    </>
   )
 }

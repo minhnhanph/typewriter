@@ -1,0 +1,356 @@
+/* --- the anatomy: the machine as a patent drawing --- */
+
+/* The way in: bottom left, the quiet twin of the sound toggle. */
+.anatomy-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-right: auto;
+  padding: 0.3rem;
+  border-radius: 50%;
+  border: 1px solid var(--surface-edge);
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.anatomy-button:hover {
+  color: var(--ink);
+  border-color: var(--ink-dim);
+}
+.anatomy-button svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.anatomy-button-dot {
+  fill: var(--stamp);
+  stroke: none;
+}
+
+/* The sheet fills the window and sits above everything. */
+.anatomy {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  animation: phase-in 0.4s var(--ease) both;
+}
+.anatomy::backdrop {
+  background: transparent;
+}
+
+/* One ruled border inset from the edge, as on a drawing sheet. */
+.anatomy-sheet {
+  position: absolute;
+  inset: 1rem;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--ink);
+}
+
+.anatomy-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.anatomy-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ribbon);
+  letter-spacing: 0.1em;
+}
+.anatomy-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+}
+
+/* Printed controls on the sheet: small ruled boxes. */
+.anatomy-tool {
+  font: inherit;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--surface-edge);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.anatomy-tool:hover {
+  color: var(--ink);
+  border-color: var(--ink-dim);
+}
+.anatomy-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--surface-edge);
+  background: transparent;
+  color: var(--ink-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.anatomy-close:hover {
+  color: var(--ink);
+  border-color: var(--ink-dim);
+}
+
+.anatomy-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 19rem;
+}
+
+/* --- the figure --- */
+
+.anatomy-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  /* Every drag is ours: no page scroll, no pinch. */
+  touch-action: none;
+  user-select: none;
+}
+.anatomy-canvas,
+.anatomy-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.anatomy-leaders {
+  pointer-events: none;
+  overflow: visible;
+}
+.anatomy-leaders line {
+  stroke: var(--stamp);
+  stroke-width: 0.9;
+}
+.anatomy-leaders circle {
+  fill: var(--stamp);
+}
+.anatomy-leaders .is-selected line {
+  stroke: var(--ribbon);
+  stroke-width: 1.3;
+}
+.anatomy-leaders .is-selected circle {
+  fill: var(--ribbon);
+}
+
+/* The reference numbers. Upright, as a draughtsman letters them. */
+.anatomy-number {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 1.6rem;
+  padding: 0.05rem 0.2rem;
+  text-align: center;
+  font-family: var(--annotation);
+  font-size: 0.95rem;
+  color: var(--stamp);
+  cursor: pointer;
+}
+.anatomy-number.is-hover {
+  color: var(--ink);
+}
+.anatomy-number.is-selected {
+  color: var(--ribbon);
+  font-weight: 700;
+}
+
+.anatomy-loading {
+  margin: auto;
+  align-self: center;
+  justify-self: center;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- the parts list, in the corner as on a real patent --- */
+
+.anatomy-legend {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.9rem;
+}
+.anatomy-legend-toggle {
+  display: none;
+}
+.anatomy-parts {
+  margin: 0;
+  padding: 0.5rem 0.25rem 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+.anatomy-part {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.1rem 0.35rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font-family: var(--annotation);
+  font-style: italic;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.anatomy-part:hover {
+  color: var(--ink);
+}
+.anatomy-part.is-selected {
+  color: var(--ribbon);
+}
+.anatomy-part-no {
+  min-width: 1.4rem;
+  font-style: normal;
+  color: var(--stamp);
+}
+.anatomy-part.is-selected .anatomy-part-no {
+  color: var(--ribbon);
+}
+
+/* --- the note --- */
+
+.anatomy-note {
+  align-self: center;
+  padding: 0 1.5rem 0 1.25rem;
+  border-left: 1px solid var(--surface-edge);
+  font-family: var(--annotation);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.anatomy-note p {
+  margin: 0 0 0.9rem;
+}
+.anatomy-note-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.anatomy-note-title .anatomy-part-no {
+  font-family: var(--annotation);
+  color: var(--ribbon);
+}
+/* How this site copies it: set off below, in the patent-note italic. */
+.anatomy-note-site {
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--surface-edge);
+  font-style: italic;
+  color: var(--stamp);
+}
+.anatomy-note.is-open {
+  animation: phase-in 0.3s var(--ease) both;
+}
+
+/* --- phones and narrow windows: the note slides up from the bottom --- */
+
+@media (max-width: 760px) {
+  .anatomy-sheet {
+    inset: 0.5rem;
+  }
+  .anatomy-head {
+    padding: 0.4rem 0.4rem 0.4rem 0.75rem;
+  }
+  .anatomy-title {
+    font-size: 1rem;
+  }
+  .anatomy-sheetno {
+    display: none;
+  }
+  .anatomy-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .anatomy-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.9rem 1rem 0.4rem;
+    border-left: 0;
+    border-top: 1px solid var(--ink);
+    background: var(--paper);
+    font-size: 0.88rem;
+  }
+  .anatomy-note:not(.is-open) {
+    border-top: 0;
+    background: transparent;
+    pointer-events: none;
+    text-align: right;
+  }
+  .anatomy-legend {
+    left: 0.6rem;
+    bottom: 0.6rem;
+    z-index: 1;
+  }
+  .anatomy-note.is-open ~ .anatomy-legend,
+  .anatomy-legend:has(~ .anatomy-note.is-open) {
+    display: none;
+  }
+  .anatomy-legend-toggle {
+    display: block;
+  }
+  .anatomy-parts {
+    display: none;
+  }
+  .anatomy-legend.is-open .anatomy-parts {
+    display: block;
+    position: absolute;
+    bottom: 2.2rem;
+    left: 0;
+    width: 15rem;
+    padding: 0.5rem 0.25rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+  }
+}
+
+/* Focus starts on the sheet itself; its outline would frame the whole window. */
+.anatomy:focus {
+  outline: none;
+}

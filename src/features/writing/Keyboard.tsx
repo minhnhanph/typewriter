@@ -40,7 +40,7 @@ const SHIFT: Key = { id: 'shift', label: 'shift\nkey', command: true, finger: 4 
  * these machines had no dedicated 1 or 0 -- you typed a lowercase L and a
  * capital O.
  */
-const ROWS: { indent: number; keys: Key[] }[] = [
+export const ROWS: { indent: number; keys: Key[] }[] = [
   {
     indent: 0,
     keys: [
