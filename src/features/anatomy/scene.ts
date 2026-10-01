@@ -195,17 +195,18 @@ export function createScene(
     polygonOffsetFactor: 1,
     polygonOffsetUnits: 1,
   })
-  const crease = (color: THREE.Color) => new LineMaterial({ color, linewidth: CREASE, resolution })
-  const creaseInk = crease(ink)
-  const creaseRed = crease(ribbon)
-  const hulls = {
-    ink: hullMaterial(ink, resolution, SILHOUETTE),
-    red: hullMaterial(ribbon, resolution, SILHOUETTE),
-    inkFine: hullMaterial(ink, resolution, SILHOUETTE_FINE),
-    redFine: hullMaterial(ribbon, resolution, SILHOUETTE_FINE),
+  /** One set of outline materials per state: plain ink, hovered in stamp blue, selected in ribbon red. */
+  const inks = (color: THREE.Color) => ({
+    crease: new LineMaterial({ color, linewidth: CREASE, resolution }),
+    hull: hullMaterial(color, resolution, SILHOUETTE),
+    hullFine: hullMaterial(color, resolution, SILHOUETTE_FINE),
+  })
+  const looks = { plain: inks(ink), hover: inks(token('--stamp')), selected: inks(ribbon) }
+  type Look = keyof typeof looks
+  function dress(b: { part: Part; crease: LineSegments2; hull: THREE.Mesh }, look: Look) {
+    b.crease.material = looks[look].crease
+    b.hull.material = b.part.fine ? looks[look].hullFine : looks[look].hull
   }
-  const hullFor = (part: Part, on: boolean) =>
-    part.fine ? (on ? hulls.redFine : hulls.inkFine) : on ? hulls.red : hulls.ink
 
   const built: Built[] = PARTS.map((part) => {
     const shapes = part.shapes.map(geometryFor)
@@ -228,8 +229,8 @@ export function createScene(
     const group = new THREE.Group()
     const fill = new THREE.Mesh(fillGeo, fillMat)
     fill.userData.part = part.id
-    const line = new LineSegments2(edges, creaseInk)
-    const hull = new THREE.Mesh(hullGeo, hullFor(part, false))
+    const line = new LineSegments2(edges, looks.plain.crease)
+    const hull = new THREE.Mesh(hullGeo, part.fine ? looks.plain.hullFine : looks.plain.hull)
     group.add(hull, fill, line)
     scene.add(group)
     return { part, group, fill, crease: line, hull, landed: opts.reducedMotion ? 1 : 0 }
@@ -389,12 +390,16 @@ export function createScene(
     invalidate()
   }
 
+  /** Back to the opening view, and the opening plays again from the exploded parts. */
   function reset() {
-    // Come back the short way round, not by unwinding every turn.
     turn = null
-    const yaw = view.yaw - Math.round((view.yaw - REST.yaw) / 360) * 360
-    view.yaw = yaw
-    rotateBy(REST.yaw - yaw, REST.pitch - view.pitch, true)
+    Object.assign(view, REST)
+    if (!opts.reducedMotion) {
+      for (const b of built) b.landed = 0
+      started = performance.now()
+      rang = false
+    }
+    invalidate()
   }
 
   /** The part under a canvas pixel, if any. */
@@ -406,13 +411,23 @@ export function createScene(
     return id && PARTS.find((p) => p.id === id)?.no !== undefined ? id : null
   }
 
-  function select(id: string | null) {
+  let selected: string | null = null
+  let hovered: string | null = null
+  function restyle() {
     for (const b of built) {
-      const on = b.part.id === id
-      b.crease.material = on ? creaseRed : creaseInk
-      b.hull.material = hullFor(b.part, on)
+      dress(b, b.part.id === selected ? 'selected' : b.part.id === hovered ? 'hover' : 'plain')
     }
     invalidate()
+  }
+  function select(id: string | null) {
+    selected = id
+    restyle()
+  }
+  /** The part under the pointer, or the one named in the parts list. */
+  function hover(id: string | null) {
+    if (id === hovered) return
+    hovered = id
+    restyle()
   }
 
   function dispose() {
@@ -422,7 +437,8 @@ export function createScene(
       b.crease.geometry.dispose()
       b.hull.geometry.dispose()
     }
-    for (const m of [fillMat, creaseInk, creaseRed, ...Object.values(hulls)]) m.dispose()
+    fillMat.dispose()
+    for (const set of Object.values(looks)) for (const m of Object.values(set)) m.dispose()
     renderer.dispose()
     // Browsers allow only a handful of live WebGL contexts; give this one back now.
     renderer.forceContextLoss()
@@ -438,6 +454,7 @@ export function createScene(
     skipAssembly,
     pick,
     select,
+    hover,
     dispose,
     get assembling() {
       return assembling()

@@ -8,6 +8,9 @@ export type FigureControls = { reset: () => void }
 type Props = {
   selected: string | null
   onSelect: (id: string | null) => void
+  /** The part under the pointer here, or under it in the parts list. */
+  hovered: string | null
+  onHover: (id: string | null) => void
   ref?: React.Ref<FigureControls>
 }
 
@@ -21,11 +24,10 @@ const BADGE = 11
  *
  * This file (and three.js with it) is only downloaded when the sheet opens.
  */
-export default function Figure({ selected, onSelect, ref }: Props) {
+export default function Figure({ selected, onSelect, hovered, onHover, ref }: Props) {
   const stage = useRef<HTMLDivElement>(null)
   const scene = useRef<Scene | null>(null)
   const [labels, setLabels] = useState<Label[]>([])
-  const [hover, setHover] = useState<string | null>(null)
 
   useImperativeHandle(ref, () => ({ reset: () => scene.current?.reset() }), [])
 
@@ -54,6 +56,7 @@ export default function Figure({ selected, onSelect, ref }: Props) {
   }, [])
 
   useEffect(() => scene.current?.select(selected), [selected])
+  useEffect(() => scene.current?.hover(hovered), [hovered])
 
   const orbit = useOrbit(scene, (x, y) => {
     const id = scene.current?.pick(x, y) ?? null
@@ -65,15 +68,15 @@ export default function Figure({ selected, onSelect, ref }: Props) {
     <div
       ref={stage}
       className="anatomy-stage"
-      style={{ cursor: hover ? 'pointer' : undefined }}
+      style={{ cursor: hovered ? 'pointer' : undefined }}
       {...orbit}
       onPointerMove={(event) => {
         orbit.onPointerMove(event)
         if (event.buttons) return
         const box = event.currentTarget.getBoundingClientRect()
-        setHover(scene.current?.pick(event.clientX - box.left, event.clientY - box.top) ?? null)
+        onHover(scene.current?.pick(event.clientX - box.left, event.clientY - box.top) ?? null)
       }}
-      onPointerLeave={() => setHover(null)}
+      onPointerLeave={() => onHover(null)}
     >
       <svg className="anatomy-leaders" aria-hidden="true">
         {labels.map((l) => {
@@ -82,7 +85,7 @@ export default function Figure({ selected, onSelect, ref }: Props) {
           const len = Math.hypot(dx, dy) || 1
           const on = l.id === selected
           return (
-            <g key={l.id} className={on ? 'is-selected' : undefined}>
+            <g key={l.id} className={on ? 'is-selected' : l.id === hovered ? 'is-hover' : undefined}>
               <line
                 x1={l.x + (dx / len) * BADGE}
                 y1={l.y + (dy / len) * BADGE}
@@ -100,15 +103,15 @@ export default function Figure({ selected, onSelect, ref }: Props) {
         <span
           key={l.id}
           aria-hidden="true"
-          className={['anatomy-number', l.id === selected && 'is-selected', l.id === hover && 'is-hover']
+          className={['anatomy-number', l.id === selected && 'is-selected', l.id === hovered && 'is-hover']
             .filter(Boolean)
             .join(' ')}
           style={{ left: l.x, top: l.y }}
           // The legend is the keyboard route; these are for the pointer.
           onPointerDown={(event) => event.stopPropagation()}
           onPointerMove={(event) => event.stopPropagation()}
-          onPointerEnter={() => setHover(l.id)}
-          onPointerLeave={() => setHover(null)}
+          onPointerEnter={() => onHover(l.id)}
+          onPointerLeave={() => onHover(null)}
           onClick={() => onSelect(l.id === selected ? null : l.id)}
         >
           {l.no}

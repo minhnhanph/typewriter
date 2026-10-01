@@ -142,7 +142,12 @@
   overflow: hidden;
   /* Every drag is ours: no page scroll, no pinch. */
   touch-action: none;
+  /* The paper itself can be picked up and turned; parts override this with a pointer. */
+  cursor: grab;
   user-select: none;
+}
+.anatomy-stage:active {
+  cursor: grabbing;
 }
 .anatomy-canvas,
 .anatomy-leaders {
@@ -162,6 +167,12 @@
 }
 .anatomy-leaders circle {
   fill: var(--stamp);
+}
+.anatomy-leaders .is-hover line {
+  stroke-width: 1.4;
+}
+.anatomy-leaders .is-hover circle {
+  r: 2.6;
 }
 .anatomy-leaders .is-selected line {
   stroke: var(--ribbon);
@@ -184,7 +195,7 @@
   cursor: pointer;
 }
 .anatomy-number.is-hover {
-  color: var(--ink);
+  font-weight: 700;
 }
 .anatomy-number.is-selected {
   color: var(--ribbon);
@@ -233,8 +244,12 @@
   text-align: left;
   cursor: pointer;
 }
-.anatomy-part:hover {
+.anatomy-part:hover,
+.anatomy-part.is-hover {
   color: var(--ink);
+}
+.anatomy-part.is-hover .anatomy-part-no {
+  font-weight: 700;
 }
 .anatomy-part.is-selected {
   color: var(--ribbon);

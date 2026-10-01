@@ -17,6 +17,8 @@ export function AnatomySheet({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null)
   const figure = useRef<FigureControls>(null)
   const [selected, setSelected] = useState<string | null>(null)
+  /** Hovered on the drawing or in the parts list; both light up together. */
+  const [hovered, setHovered] = useState<string | null>(null)
   /** Phones only: the parts list folds away behind a toggle. */
   const [listOpen, setListOpen] = useState(false)
   const part = NUMBERED.find((p) => p.id === selected)
@@ -65,7 +67,13 @@ export function AnatomySheet({ onClose }: { onClose: () => void }) {
 
         <div className="anatomy-body">
           <Suspense fallback={<p className="anatomy-loading">Drawing…</p>}>
-            <Figure ref={figure} selected={selected} onSelect={choose} />
+            <Figure
+              ref={figure}
+              selected={selected}
+              onSelect={choose}
+              hovered={hovered}
+              onHover={setHovered}
+            />
           </Suspense>
 
           <nav className={`anatomy-legend${listOpen ? ' is-open' : ''}`} aria-label="Parts">
@@ -80,7 +88,11 @@ export function AnatomySheet({ onClose }: { onClose: () => void }) {
               {NUMBERED.map((p) => (
                 <li key={p.id}>
                   <button
-                    className={`anatomy-part${p.id === selected ? ' is-selected' : ''}`}
+                    className={`anatomy-part${p.id === selected ? ' is-selected' : p.id === hovered ? ' is-hover' : ''}`}
+                    onPointerEnter={() => setHovered(p.id)}
+                    onPointerLeave={() => setHovered(null)}
+                    onFocus={() => setHovered(p.id)}
+                    onBlur={() => setHovered(null)}
                     aria-pressed={p.id === selected}
                     onClick={() => choose(p.id)}
                   >
