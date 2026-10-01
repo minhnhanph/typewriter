@@ -79,7 +79,7 @@ export function Typewriter({
           col={col}
           motion={motion}
           scroll={scroll}
-          placeholder="Start typing. No one else will see this."
+          placeholder="What are you carrying?"
         />
         <span className="tw-printing-point" aria-hidden="true" />
       </div>
