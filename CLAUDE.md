@@ -196,6 +196,7 @@ hardcodes a colour, so retheming means editing that one block.
 | `--char` | `#4a3f33` | Charred letters and drifting ash. |
 | `--snake` | `#5f7a37` | The snake. **3.8:1** — decorative, never text. |
 | `--stamp` | `#2f4a6b` | Rubber stamps and patent notes. The one cool colour. **~7:1** |
+| `--stamp-light` | `#4682c8` | Hovered parts on the anatomy drawing. Lines only. **3.1:1**, and 3.6:1 against the ink |
 | `--display` | Barlow Condensed | Printed capitals on the form. Bundled in `src/assets/fonts`. |
 | `--annotation` | Georgia | The italic notes on the machine. |
 | `--mono` / `--type-size` / `--lh` | — | The character grid. `--lh` must stay a length, not a ratio; everything is positioned against it. |

@@ -201,7 +201,7 @@ export function createScene(
     hull: hullMaterial(color, resolution, SILHOUETTE),
     hullFine: hullMaterial(color, resolution, SILHOUETTE_FINE),
   })
-  const looks = { plain: inks(ink), hover: inks(token('--stamp')), selected: inks(ribbon) }
+  const looks = { plain: inks(ink), hover: inks(token('--stamp-light')), selected: inks(ribbon) }
   type Look = keyof typeof looks
   function dress(b: { part: Part; crease: LineSegments2; hull: THREE.Mesh }, look: Look) {
     b.crease.material = looks[look].crease

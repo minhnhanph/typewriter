@@ -34,6 +34,10 @@
   /* Rubber-stamp blue: the NOT DELIVERED stamp and the patent labels on the
      machine. The only cool colour in the palette, so it reads as "office". */
   --stamp: #2f4a6b;
+  /* A lighter stamp blue for hovered parts on the anatomy drawing: dark stamp
+     blue sits too close to the brown ink to tell apart (1.6:1). This clears
+     3:1 against both the paper and the ink. Lines only, never small text. */
+  --stamp-light: #4682c8;
 
   --ember: #d2500f;
   --char: #4a3f33;

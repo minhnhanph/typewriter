@@ -169,9 +169,11 @@
   fill: var(--stamp);
 }
 .anatomy-leaders .is-hover line {
+  stroke: var(--stamp-light);
   stroke-width: 1.4;
 }
 .anatomy-leaders .is-hover circle {
+  fill: var(--stamp-light);
   r: 2.6;
 }
 .anatomy-leaders .is-selected line {
