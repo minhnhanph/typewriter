@@ -3,12 +3,13 @@
  * host. Strikes, the space bar, the margin clunk and the tab ratchet are all
  * short bursts of filtered noise; the margin bell is a sine tone.
  *
- * Sound starts off. The toggle in the corner is the opt-in, and clicking it
- * counts as the interaction browsers want before they'll play audio.
+ * Sound starts on. Browsers won't play audio before the visitor's first click
+ * or keystroke, so the audio context is only made inside the first sound --
+ * which is always a response to one. The toggle in the corner turns it off.
  */
 
 let ctx: AudioContext | null = null
-let muted = true
+let muted = false
 
 function audio(): AudioContext | null {
   if (muted) return null

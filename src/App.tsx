@@ -8,6 +8,7 @@ import { findDestroyer } from './features/destruction/registry'
 import { countWords } from './core/text'
 import { draftText } from './core/sheet'
 import { setMuted } from './lib/sound'
+import { SoundIcon } from './lib/SoundIcon'
 import { useLocalDraft } from './lib/useLocalDraft'
 
 /**
@@ -29,8 +30,8 @@ export default function App() {
   const [stage, setStage] = useState<Stage>({ name: 'write' })
   /** A frozen copy of the text being destroyed. The draft itself is already gone. */
   const [condemned, setCondemned] = useState('')
-  // Off until they opt in.
-  const [sound, setSound] = useState(false)
+  // On from the start; the first keystroke is what lets the browser play it.
+  const [sound, setSound] = useState(true)
 
   const toggleSound = () => {
     setSound((on) => {
@@ -81,7 +82,7 @@ export default function App() {
         aria-pressed={sound}
         title={sound ? 'Sound off' : 'Sound on'}
       >
-        {sound ? '♪' : '✕'}
+        <SoundIcon on={sound} />
       </button>
 
       {stage.name === 'write' && (
