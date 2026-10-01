@@ -1,6 +1,6 @@
 # Typewriter
 
-Write something down. Then destroy it.
+For the words you've been carrying. Burn them, or send them to someone you love.
 
 ## Running it
 

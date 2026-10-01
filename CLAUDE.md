@@ -1,6 +1,6 @@
 # Typewriter
 
-Write something down. Then destroy it.
+For the words you've been carrying. Burn them, or send them to someone you love.
 
 This file is the durable context for the project — what it is, how it's built,
 and how it should look. `README.md` covers only how to run it.
