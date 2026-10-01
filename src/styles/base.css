@@ -233,7 +233,10 @@ body::after {
   border: 3px solid var(--stamp);
   border-radius: 6px;
   color: var(--stamp);
-  font-size: 2.2rem;
+  /* Shrinks on narrow phones so the longer stamps stay clear of the edges. */
+  font-size: min(2.2rem, 7vw);
+  max-width: calc(100vw - 3rem);
+  text-align: center;
   opacity: 0.85;
   transform: rotate(-8deg);
   animation: stamp-down 0.38s var(--ease) 0.5s both;

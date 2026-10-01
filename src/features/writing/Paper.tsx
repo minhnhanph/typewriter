@@ -24,7 +24,7 @@ type Props = {
  * One typed line. Memoised on the row itself: typing only ever replaces the
  * row being typed on, so every other line skips re-rendering.
  */
-const PaperRow = memo(function PaperRow({ row, index }: { row: Row; index: number }) {
+export const PaperRow = memo(function PaperRow({ row, index }: { row: Row; index: number }) {
   return (
     <div className="paper-row" style={{ '--row': index } as React.CSSProperties}>
       {row.map(

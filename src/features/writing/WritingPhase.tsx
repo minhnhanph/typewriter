@@ -12,6 +12,8 @@ type Props = {
   draft: Draft
   onChange: (draft: Draft) => void
   onDone: () => void
+  /** The strip's heading, e.g. REPLY when answering a letter. */
+  title?: string
 }
 
 /**
@@ -34,7 +36,7 @@ const FUNCTION_OPS: Record<string, Op> = {
  * keystroke is turned into a machine operation, and the page is drawn from
  * the draft, never from the input.
  */
-export function WritingPhase({ draft, onChange, onDone }: Props) {
+export function WritingPhase({ draft, onChange, onDone, title }: Props) {
   const input = useRef<HTMLTextAreaElement>(null)
   const machine = useMachine(draft, onChange)
   const { press, paste, undo, setShiftHeld, shift, toggleShiftSticky } = machine
@@ -165,7 +167,7 @@ export function WritingPhase({ draft, onChange, onDone }: Props) {
   return (
     <>
       <div className="phase phase-writing" onMouseDown={keepFocus}>
-        <TelegramStrip words={words} />
+        <TelegramStrip words={words} title={title} />
 
         <textarea
           ref={input}

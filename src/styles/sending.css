@@ -1,0 +1,499 @@
+/* --- send: the third ticket --- */
+
+/* Stamp blue: sending is office business, not heat. */
+.ticket-send .ticket-mark {
+  color: var(--stamp);
+}
+
+.ticket-reply .ticket-mark {
+  color: var(--ribbon);
+}
+
+/* --- send: sealing the envelope --- */
+
+.phase-send {
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 2rem 1.5rem;
+  overflow: hidden;
+}
+
+/* Everything is sized off the envelope, which is sized off the screen.
+   The timeline, all in one place (SEAL_MS in SendPhase.tsx is its end):
+     0.5s  the sheet slides in        1.55s the flap closes
+     2.1s  the seal presses           2.75s the envelope turns over
+     3.75s the postmark lands         4.6s  on to the receipt            */
+.send-stage {
+  --env-w: min(22rem, calc(100vw - 3rem));
+  --env-h: calc(var(--env-w) * 0.6);
+  position: relative;
+  width: var(--env-w);
+  height: calc(var(--env-h) * 2.2);
+  perspective: 1400px;
+}
+
+/* Two sides back to back. Turning it over is one rotation of the whole. */
+.envelope {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--env-w);
+  height: var(--env-h);
+  transform-style: preserve-3d;
+  animation: envelope-turn 0.8s var(--ease) 2.75s forwards;
+}
+
+@keyframes envelope-turn {
+  to {
+    /* Lifted to the middle of the screen as it turns, now the sheet is in. */
+    transform: translateY(calc(var(--env-h) * -0.6)) rotateY(180deg);
+  }
+}
+
+.envelope-side {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+/* --- the back: flap, letter, pocket, seal --- */
+
+.envelope-back {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
+
+/* The front of the pocket: solid paper the sheet slides behind, with the
+   folds of its side flaps drawn on. */
+.envelope-pocket {
+  position: absolute;
+  inset: -2px;
+  z-index: 2;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
+
+.envelope-fold {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.envelope-fold path,
+.envelope-flap path {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.envelope-fold path {
+  fill: none;
+}
+
+/* The flap starts open, standing up behind the sheet, showing its darker
+   inside; it closes over the sheet to show its outside. Both switches happen
+   halfway, edge-on, where they can't be seen. */
+.envelope-flap {
+  position: absolute;
+  z-index: 0;
+  left: -2px;
+  top: -2px;
+  width: calc(100% + 4px);
+  height: 66%;
+  overflow: visible;
+  transform-origin: top;
+  transform: scaleY(-1);
+  animation: flap-close 0.45s var(--ease) 1.55s forwards;
+}
+
+.envelope-flap path {
+  fill: var(--surface-edge);
+  animation: flap-outside 0.45s 1.55s forwards;
+}
+
+@keyframes flap-close {
+  to {
+    z-index: 3;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes flap-outside {
+  50%,
+  100% {
+    fill: var(--surface);
+  }
+}
+
+/* The letter itself, small, sliding down into the envelope. It's already gone
+   from the browser's storage; this is the last look at it. Shorter than the
+   envelope, so it ends up wholly inside. */
+.letter-sheet {
+  position: absolute;
+  z-index: 1;
+  left: 8%;
+  bottom: calc(var(--env-h) * 1.1);
+  width: 84%;
+  height: calc(var(--env-h) * 0.9);
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  overflow: hidden;
+  background: var(--paper-light);
+  border: 1px solid var(--surface-edge);
+  font-family: var(--mono);
+  /* The whole page width fits across the sheet. */
+  font-size: min(0.6rem, calc(var(--env-w) * 0.84 / (58 * 0.63) - 0.05rem));
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre;
+  /* Long letters fade out at the foot of the sheet rather than spilling. */
+  mask: linear-gradient(black 60%, transparent);
+  animation: into-envelope 1s var(--ease) 0.5s forwards;
+}
+
+@keyframes into-envelope {
+  to {
+    transform: translateY(calc(var(--env-h) * 1.05));
+  }
+}
+
+/* A seal pressed where the flap's point lands: ribbon red, a little uneven
+   at the edge the way pressed wax is, with a typebar letter in it. */
+.envelope-seal {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 56%;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: -1.3rem 0 0 -1.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 48% 52% 46% 54% / 53% 47% 55% 45%;
+  background: var(--ribbon);
+  opacity: 0;
+  animation: seal-press 0.35s var(--ease) 2.1s forwards;
+}
+
+.envelope-seal::before {
+  content: '';
+  position: absolute;
+  inset: 0.3rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--paper-light);
+  opacity: 0.7;
+}
+
+.envelope-seal .printed {
+  color: var(--paper-light);
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+@keyframes seal-press {
+  from {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg);
+  }
+}
+
+/* --- the face: airmail border, postage, postmark, address --- */
+
+/* The red and blue airmail border -- the ribbon's two inks. Flat stripes, not
+   shading, so it stays drawn. */
+.envelope-face {
+  transform: rotateY(180deg);
+  padding: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ribbon) 0 0.7rem,
+    var(--surface) 0.7rem 1.15rem,
+    var(--stamp) 1.15rem 1.85rem,
+    var(--surface) 1.85rem 2.3rem
+  );
+}
+
+.envelope-face-paper {
+  position: relative;
+  height: 100%;
+  background: var(--surface);
+}
+
+/* The blue box an airmail letter carries in its corner. */
+.airmail-label {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  padding: 0.3rem 0.5rem 0.2rem;
+  border: 1.5px solid var(--stamp);
+  color: var(--stamp);
+  font-size: 0.7rem;
+}
+
+/* A postage stamp: perforated edges punched with a grid of holes centred on
+   its border, the inner picture covering the rest. Sized in whole multiples of
+   the hole spacing so a hole lands exactly on every corner. */
+.postage {
+  --hole: 7px;
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  width: calc(var(--hole) * 8);
+  height: calc(var(--hole) * 9);
+  z-index: 1;
+  background: radial-gradient(circle at 0 0, transparent 2.2px, var(--ribbon) 2.6px) 0 0 /
+    var(--hole) var(--hole);
+  transform: rotate(2deg);
+}
+
+.postage-art {
+  position: absolute;
+  inset: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--paper-light);
+}
+
+.postage-drawing {
+  width: 80%;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.postage-drawing circle {
+  fill: var(--ink);
+  stroke: none;
+}
+
+.postage-value {
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* Stamp-blue ink, thumped across the postage like the aftermath's stamp. */
+.postmark {
+  position: absolute;
+  z-index: 2;
+  right: 3.5rem;
+  top: 1.6rem;
+  width: 10rem;
+  fill: none;
+  stroke: var(--stamp);
+  stroke-width: 2.6;
+  opacity: 0;
+  animation: postmark-thump 0.38s var(--ease) 3.75s forwards;
+}
+
+.postmark text {
+  fill: var(--stamp);
+  stroke: none;
+  font-family: var(--display);
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.postmark-ring-text {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.postmark-date {
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.postmark-year {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+}
+
+@keyframes postmark-thump {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(1.5);
+  }
+  to {
+    opacity: 0.85;
+    transform: rotate(-10deg);
+  }
+}
+
+/* Typed on ruled lines, the only typing on the envelope. */
+.envelope-address {
+  position: absolute;
+  left: 30%;
+  right: 12%;
+  bottom: 14%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.6rem;
+  row-gap: 0.35rem;
+  align-items: end;
+}
+
+.envelope-address .printed {
+  grid-row: 1;
+  font-size: 0.8rem;
+}
+
+.envelope-address-line {
+  grid-column: 2;
+  min-height: 1.3em;
+  border-bottom: 1px solid var(--surface-edge);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+/* --- the link slip, under the receipt --- */
+
+.link-slip {
+  width: min(22rem, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  animation: phase-in 0.6s var(--ease) 1.3s both;
+}
+
+.link-slip .fine-print {
+  margin: 0;
+}
+
+.link-slip-field {
+  width: 100%;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--ink);
+  background: var(--paper-light);
+  border: 1px dashed var(--ink-dim);
+  border-radius: 3px;
+  text-overflow: ellipsis;
+}
+
+.link-slip-field:focus-visible {
+  outline: 2px solid var(--ribbon);
+  outline-offset: 1px;
+}
+
+.link-slip-note {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  text-wrap: balance;
+}
+
+/* A sent letter's ending carries more, so it may need to scroll on short screens. */
+.phase-aftermath:has(.link-slip) {
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+
+/* --- reading a letter --- */
+
+/* Nothing on this screen takes typing, so any click on the page skips ahead. */
+.phase-reading {
+  cursor: default;
+}
+
+/* The view switch on the left, Done reading on the right. */
+.reading-actions {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Two settings on one strip of ticker tape: the chosen one is inked. */
+.view-switch {
+  display: flex;
+  padding: 0.2rem;
+  border: 1px solid var(--surface-edge);
+  border-radius: 999px;
+  background: var(--paper-light);
+}
+
+.view-switch-option {
+  padding: 0.35rem 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+
+.view-switch-option:hover {
+  color: var(--ink);
+}
+
+.view-switch-option[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper-light);
+}
+
+.view-switch-option:focus-visible {
+  outline: 2px solid var(--ribbon);
+  outline-offset: 1px;
+}
+
+/* --- the letter on its own --- */
+
+/* The sheet out of the machine, scrolled like a page. Fades under the
+   telegram strip and the buttons rather than cutting off against them. */
+.letter-view {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 7rem 1rem 7rem;
+  mask-image: linear-gradient(transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
+  outline: none;
+}
+
+/* The same sheet as in the machine -- paper, edge, margins, ink -- standing
+   still. Shrinks with the screen so a full line always fits. */
+.letter-page {
+  flex: none;
+  position: relative;
+  font-size: min(var(--type-size), calc((100vw - 2rem) / ((var(--cols) + 2 * var(--pad-cols)) * 0.62)));
+  /* A length, as the grid needs, but in em so it shrinks with the type. */
+  --lh: 1.65em;
+  width: calc((var(--cols) + 2 * var(--pad-cols)) * 1ch);
+  height: calc((var(--lines) + 2 * var(--pad-lines)) * var(--lh));
+  background: var(--paper-light);
+  border: 1px solid var(--surface-edge);
+  animation: phase-in 0.5s var(--ease) both;
+}
+
+@media (max-width: 640px) {
+  .letter-view {
+    padding: 6rem 0.75rem 2rem;
+  }
+}

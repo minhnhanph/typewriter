@@ -7,8 +7,10 @@ export type ReceiptData = {
   characters: number
   /** When they chose a destroyer -- the moment the draft was deleted. */
   filedAt: Date
-  /** When the last character went. */
+  /** When the last character went, or the letter was sealed. */
   destroyedAt: Date
+  /** What happened to it, which also labels that time. */
+  outcome: 'destroyed' | 'sent'
   /** The destroyer's one-word name. */
   method: string
 }
@@ -22,7 +24,7 @@ export function Receipt({ receipt }: { receipt: ReceiptData }) {
     ['words', String(receipt.words)],
     ['characters', String(receipt.characters)],
     ['filed', formatTime(receipt.filedAt)],
-    ['destroyed', formatTime(receipt.destroyedAt)],
+    [receipt.outcome, formatTime(receipt.destroyedAt)],
     ['method', receipt.method.toLowerCase()],
   ]
 

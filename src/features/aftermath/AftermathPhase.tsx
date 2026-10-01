@@ -1,8 +1,13 @@
 import { useMemo } from 'react'
+import { LinkSlip } from '../sending/LinkSlip'
 import { Receipt, type ReceiptData } from './Receipt'
 
 type Props = {
   receipt: ReceiptData
+  /** The rubber stamp's words: NOT DELIVERED, READY FOR DELIVERY, ... */
+  stamp: string
+  /** A sent letter's link. Its presence means nothing burned, so no ash. */
+  link?: string
   onWriteAgain: () => void
 }
 
@@ -13,7 +18,7 @@ const ASH_COUNT = 34
  * exists so the destruction has somewhere to settle instead of snapping back
  * to a blank page.
  */
-export function AftermathPhase({ receipt, onWriteAgain }: Props) {
+export function AftermathPhase({ receipt, stamp, link, onWriteAgain }: Props) {
   // Generated once so the ash doesn't reshuffle on every render.
   const ashes = useMemo(
     () =>
@@ -30,29 +35,35 @@ export function AftermathPhase({ receipt, onWriteAgain }: Props) {
 
   return (
     <div className="phase phase-aftermath">
-      <div className="ashfall" aria-hidden="true">
-        {ashes.map((ash, i) => (
-          <span
-            key={i}
-            className="ash"
-            style={
-              {
-                '--left': `${ash.left}%`,
-                '--delay': `${ash.delay}s`,
-                '--duration': `${ash.duration}s`,
-                '--drift': `${ash.drift}px`,
-                '--size': `${ash.size}px`,
-                '--opacity': ash.opacity,
-              } as React.CSSProperties
-            }
-          />
-        ))}
-      </div>
+      {!link && (
+        <div className="ashfall" aria-hidden="true">
+          {ashes.map((ash, i) => (
+            <span
+              key={i}
+              className="ash"
+              style={
+                {
+                  '--left': `${ash.left}%`,
+                  '--delay': `${ash.delay}s`,
+                  '--duration': `${ash.duration}s`,
+                  '--drift': `${ash.drift}px`,
+                  '--size': `${ash.size}px`,
+                  '--opacity': ash.opacity,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
 
       <div className="aftermath-content">
-        <p className="printed stamp">Not delivered</p>
+        <p className="printed stamp">{stamp}</p>
         <Receipt receipt={receipt} />
-        <button className="button button-primary" onClick={onWriteAgain}>
+        {link && <LinkSlip link={link} />}
+        <button
+          className={`button ${link ? 'button-ghost' : 'button-primary'}`}
+          onClick={onWriteAgain}
+        >
           Write something else
         </button>
       </div>

@@ -4,6 +4,7 @@ import App from './App'
 import './styles/base.css'
 import './styles/writing.css'
 import './styles/destruction.css'
+import './styles/sending.css'
 import './styles/anatomy.css'
 
 createRoot(document.getElementById('root')!).render(

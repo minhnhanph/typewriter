@@ -13,14 +13,25 @@ A single-page site with one short journey and no accounts:
 
 ```
 write  →  choose  →  destroy  →  aftermath
+                 ↘  send     ↗
 ```
 
 1. **Write.** A drawn typewriter with a fixed printing point: the paper slides
    left as you type and up as you return, the way a real carriage moves.
-2. **Choose.** Two ways to destroy it: feed it to a snake, or give it to a fire.
+2. **Choose.** Two ways to destroy it, feed it to a snake or give it to a fire,
+   or a third: send it to a friend.
 3. **Destroy.** The text is eaten or burned away, character by character.
+   **Send** instead slides the sheet into an envelope.
 4. **Aftermath.** A NOT DELIVERED stamp, a torn receipt (counts and times, never
-   the words), drifting ash, and an invitation to write again.
+   the words), drifting ash, and an invitation to write again. A sent letter
+   gets a READY FOR DELIVERY stamp and its link to copy or share instead of ash.
+
+**The friend's journey.** Opening a letter link shows the whole letter on a
+still sheet — the machine's own paper and ink, out of the machine. A
+**Letter · Typewriter** switch replays it typing itself out on the machine
+(any key or click skips ahead). Then they choose its fate —
+snake, fire, or **write back** (a fresh sheet headed REPLY, which they can send
+back the same way). Destroying it ends on DESTROYED ON RECEIPT.
 
 **The promise the product rests on: the destruction is real.** The draft is
 deleted from the browser the moment the user picks a destroyer — not when the
@@ -32,7 +43,9 @@ theatre. Anything that weakens this needs a deliberate decision, not a shortcut.
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Where drafts live | The user's own browser only. No server, no account. | Nothing to breach, nothing to maintain, no privacy policy. |
-| When the draft dies | The moment they choose a destroyer. | The point of no return, and it protects the promise above. |
+| When the draft dies | The moment they choose a destroyer, **or Send**. | The point of no return, and it protects the promise above. |
+| Sending | The letter travels **inside its link**, after the `#`, which browsers never send to the server. Still no server. Sending deletes it here; the link is the only copy. The friend's browser never saves it, and the link leaves their address bar once they choose. | Keeps "no server" true. The honest cost: a link can't be revoked — whoever holds it can reopen it. |
+| The friend's choices | Snake, fire, or write back. Not "send it on". | Received letters end with the friend, or start a reply. |
 | Snake | Playable with arrow keys / WASD on desktop; runs itself on touch devices. | Steering wants a keyboard; phones still reach the same ending. |
 | Can you lose? | **No.** Walls wrap, the snake passes through itself. | It's a ritual, not a challenge. Failing would turn your own words into an obstacle you're losing at. |
 | Fire | Watch it, but click or tap anywhere to drop another spark. | Deliberate contrast with the snake: one is "I destroy it", the other is "I let it go". |
@@ -79,10 +92,11 @@ That's why the snake and the fire share almost no code but line up perfectly.
 
 ```
 src/
-  App.tsx                       the 4-stage machine, and nothing else
+  App.tsx                       the stage machine (both journeys), and nothing else
   core/sheet.ts                 the machine as data: keystroke in, next draft out
   core/text.ts                  wrapping, the character grid, word count
-  lib/                          useLocalDraft, useIsTouch, useClock, time, sound
+  lib/                          useLocalDraft, useIsTouch, useClock, time, sound,
+                                letterLink (text ⇄ link: compressed, after the #)
   features/
     writing/                    WritingPhase (input), useMachine (timing, sound),
                                 Typewriter, Keyboard, Paper (the sliding sheet), TelegramStrip
@@ -93,6 +107,13 @@ src/
       destroyers/snake.tsx, fire.tsx
     aftermath/
       Receipt.tsx               the torn receipt and its data
+    sending/
+      SendPhase                 the envelope, while the link is packed
+      LinkSlip                  copy / share the link, on the aftermath screen
+      ReadingPhase              the friend's side, and its Letter · Typewriter switch
+      LetterSheet               the whole letter on a still sheet (the default)
+      TypedLetter               the letter typing itself out on the machine
+      marks.tsx                 the SEND and REPLY ticket drawings
     anatomy/                    the machine as a rotatable patent drawing
       parts.ts                  ← the machine as data: shapes, numbers, notes
       scene.ts                  three.js: paper fills, ink outlines, opening, picking
@@ -111,6 +132,9 @@ Adding a third way to destroy the text:
 2. Add it to the array in `registry.ts`.
 
 That's the whole change. Nothing else needs to know it exists.
+
+Send and Reply are **not** destroyers: they don't empty a grid. They're passed
+to `ChoosePhase` as `extras` from `App.tsx`.
 
 ### Gotchas that have already caused real bugs
 
@@ -247,6 +271,11 @@ The numbers worth turning when something feels wrong:
 - **Short laptop screens** show only about three typed lines above the
   printing point; the machine takes the rest of the height.
 - **Ash on the aftermath screen is very subtle** since the theme went light.
+- **A sent letter can't be taken back,** and chat apps may keep or preview the
+  link. A full page makes a link of roughly 250 characters; much longer
+  letters make longer links, which a few apps truncate.
+- **The sender's link exists only on the READY FOR DELIVERY screen.** Close it without
+  copying and the letter is gone — the screen says so.
 
 ## Open threads
 
