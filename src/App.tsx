@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { AftermathPhase } from './features/aftermath/AftermathPhase'
 import { ChoosePhase } from './features/destruction/ChoosePhase'
 import { DestructionPhase } from './features/destruction/DestructionPhase'
@@ -6,6 +6,7 @@ import { WritingPhase } from './features/writing/WritingPhase'
 import type { ReceiptData } from './features/aftermath/Receipt'
 import { findDestroyer } from './features/destruction/registry'
 import { countWords } from './core/text'
+import { draftText } from './core/sheet'
 import { setMuted } from './lib/sound'
 import { useLocalDraft } from './lib/useLocalDraft'
 
@@ -23,11 +24,13 @@ type Stage =
 const docketNumber = () => String(Math.floor(Math.random() * 10_000)).padStart(4, '0')
 
 export default function App() {
-  const { text, setText, discard } = useLocalDraft()
+  const { draft, setDraft, discard } = useLocalDraft()
+  const text = useMemo(() => draftText(draft), [draft])
   const [stage, setStage] = useState<Stage>({ name: 'write' })
   /** A frozen copy of the text being destroyed. The draft itself is already gone. */
   const [condemned, setCondemned] = useState('')
-  const [sound, setSound] = useState(true)
+  // Off until they opt in.
+  const [sound, setSound] = useState(false)
 
   const toggleSound = () => {
     setSound((on) => {
@@ -74,14 +77,15 @@ export default function App() {
         // receiving keystrokes. Tab still reaches it.
         onMouseDown={(event) => event.preventDefault()}
         onClick={toggleSound}
-        aria-label={sound ? 'Mute sound' : 'Unmute sound'}
-        title={sound ? 'Mute' : 'Unmute'}
+        aria-label={sound ? 'Turn sound off' : 'Turn sound on'}
+        aria-pressed={sound}
+        title={sound ? 'Sound off' : 'Sound on'}
       >
         {sound ? '♪' : '✕'}
       </button>
 
       {stage.name === 'write' && (
-        <WritingPhase text={text} onChange={setText} onDone={() => setStage({ name: 'choose' })} />
+        <WritingPhase draft={draft} onChange={setDraft} onDone={() => setStage({ name: 'choose' })} />
       )}
 
       {stage.name === 'choose' && (

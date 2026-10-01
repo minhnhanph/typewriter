@@ -15,8 +15,8 @@ A single-page site with one short journey and no accounts:
 write  →  choose  →  destroy  →  aftermath
 ```
 
-1. **Write.** A drawn typewriter reacts to every keystroke while the text fills
-   a page that scrolls as it grows.
+1. **Write.** A drawn typewriter with a fixed printing point: the paper slides
+   left as you type and up as you return, the way a real carriage moves.
 2. **Choose.** Two ways to destroy it: feed it to a snake, or give it to a fire.
 3. **Destroy.** The text is eaten or burned away, character by character.
 4. **Aftermath.** A NOT DELIVERED stamp, a torn receipt (counts and times, never
@@ -36,7 +36,10 @@ theatre. Anything that weakens this needs a deliberate decision, not a shortcut.
 | Snake | Playable with arrow keys / WASD on desktop; runs itself on touch devices. | Steering wants a keyboard; phones still reach the same ending. |
 | Can you lose? | **No.** Walls wrap, the snake passes through itself. | It's a ritual, not a challenge. Failing would turn your own words into an obstacle you're losing at. |
 | Fire | Watch it, but click or tap anywhere to drop another spark. | Deliberate contrast with the snake: one is "I destroy it", the other is "I let it go". |
-| Sound | Synthesised in the browser, no audio files. Mutable, top right. | No assets to host; the first keystroke satisfies the browser's autoplay rule. |
+| Sound | Synthesised in the browser, no audio files. **Off until the user turns it on**, top right. | No assets to host; the click that turns it on satisfies the browser's autoplay rule. |
+| Printing point | Fixed. The paper and carriage move, the caret never does. To read back, the paper rolls up like turning the platen knob (wheel, drag, ↑ ↓, Page Up/Down); the next keystroke rolls it home. | It's what separates a typewriter from a text editor in costume. Reading back is allowed; editing back up the page is not. |
+| Right margin | A hard stop, always. The bell rings 7 columns before it; you end each line yourself. | Every line ends because you chose to end it. Pasted text is the exception: it wraps, or it would be lost. |
+| Mechanical constraints | None. Back Spacer erases (and steps back up a line), Cmd+Z undoes, the paper never runs out. A strict mode with overprinting and a sheet that ends was built and then removed. | It's a writing tool, not a toy. The *feel* (sound, motion, carriage, bell) is all kept. |
 
 ---
 
@@ -55,12 +58,18 @@ Deploys as static files anywhere (Vercel, Netlify, GitHub Pages).
 
 ### The one idea everything rests on
 
-`src/core/text.ts` turns text into a **grid of character cells** — graph paper,
+Everything rests on a **grid of character cells** — graph paper,
 where every letter has a row and column number. Because the font is monospace
 this is exact and costs nothing.
 
-- **Writing** uses it to draw lines and place the caret.
-- **Destroying** uses it to know what the snake can eat and the fire can burn.
+- **Writing** (`src/core/sheet.ts`) keeps the draft *as* that grid: typed
+  cells, a current column, a current line. The paper's position and the
+  carriage's place on its rail are both derived from column and line, so they
+  can't drift apart under fast typing. Each letter stores its own slight ink
+  variation, fixed when typed.
+- **Destroying** (`src/core/text.ts`) gets the draft back as plain text and
+  lays it out on the same grid, to know what the snake can eat and the fire
+  can burn. No line is ever wider than `COLS`, so it lines up exactly.
 
 That's why the snake and the fire share almost no code but line up perfectly.
 `COLS = 58` is the page width in characters; changing it reflows everything.
@@ -70,10 +79,12 @@ That's why the snake and the fire share almost no code but line up perfectly.
 ```
 src/
   App.tsx                       the 4-stage machine, and nothing else
+  core/sheet.ts                 the machine as data: keystroke in, next draft out
   core/text.ts                  wrapping, the character grid, word count
   lib/                          useLocalDraft, useIsTouch, useClock, time, sound
   features/
-    writing/                    Paper (the page), Typewriter (the machine), TelegramStrip
+    writing/                    WritingPhase (input), useMachine (timing, sound),
+                                Typewriter, Keyboard, Paper (the sliding sheet), TelegramStrip
     destruction/
       ChoosePhase, DestructionPhase, GridStage
       registry.ts               ← the list of destroyers
@@ -102,7 +113,15 @@ Each of these was a genuine failure, not a hypothetical:
 - **Focus.** The writing screen's input is an invisible `<textarea>` that we
   focus in code. A plain click moves focus to the page body and typing silently
   stops. Any clickable thing on that screen must cancel the default mousedown
-  (see `WritingPhase.keepFocus` and the sound toggle in `App.tsx`).
+  (see `WritingPhase.keepFocus` and the sound toggle in
+  `App.tsx`). The drawn keys aren't buttons for the same reason.
+- **The input holds one space and nothing else.** Every keystroke is turned
+  into a machine operation and cancelled. The space is there so phone
+  keyboards still send Backspace — they don't on an empty field.
+- **Keystrokes land through one queue, never a timer each.** A letter lands
+  80 ms after its key goes down; a Back Spacer right behind it lands
+  immediately after. With separate timers the browser sometimes fired them out
+  of order and the letter overwrote the erase. See `useMachine.enqueue`.
 - **Fire burns the page, not the letters.** Letters igniting neighbouring
   letters cannot cross the gap between two words — every space is a firebreak
   and it stalls. The flame front lives on the full rectangle, blanks included.
@@ -197,19 +216,18 @@ The numbers worth turning when something feels wrong:
 | Snake speed, growth, length cap | `destroyers/snake.tsx` top constants |
 | Fire spread, heat, how long char lingers | `destroyers/fire.tsx` top constants |
 | Page width in characters | `COLS` in `core/text.ts` |
+| Bell point, tab stops | top of `core/sheet.ts` |
+| Typebar delay, swing cap, paper travel | top of `writing/useMachine.ts`; `.is-type` / `.is-tab` / `.is-return` in `writing.css` |
 | Keyboard arc and stagger | `arc()` and row `indent` in `Typewriter.tsx` |
 
 ---
 
 ## Known issues
 
-- **Mobile writing screen: text runs off the right edge.** The page is a fixed
-  58-character grid and 58 characters don't fit in 390px at this size. The real
-  fix is making the column count adapt, which touches text layout, not styling.
-  Deliberately deferred — the project is desktop-first.
-- **A large empty gap** between the text and the machine on the writing screen.
-  Unresolved on purpose; needs a design call (centre the text, cap the page
-  height, or leave it as breathing room).
+- **Phone keyboards that build words** (most Android ones) only hand over a
+  word when it's finished, so letters arrive a word at a time there.
+- **Short laptop screens** show only about three typed lines above the
+  printing point; the machine takes the rest of the height.
 - **Ash on the aftermath screen is very subtle** since the theme went light.
 
 ## Open threads
